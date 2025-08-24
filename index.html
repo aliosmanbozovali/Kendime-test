@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="tr">
 <head>
@@ -70,7 +69,7 @@
   .note-content{white-space:pre-wrap;word-break:break-word}
   .edit-mode{border:2px solid var(--accent)}
   .keyboard-shortcuts{position:fixed;bottom:10px;left:10px;font-size:12px;color:var(--muted);background:var(--card);padding:8px;border-radius:8px;border:1px solid var(--border);opacity:0.7}
-  
+
   /* Mobile optimizations */
   @media (max-width: 768px) {
     .wrap{padding:8px}
@@ -92,14 +91,14 @@
     .note-card{margin-bottom:8px}
     .stats{grid-template-columns:repeat(2,1fr)}
   }
-  
+
   /* Touch targets */
   .color-dot{width:32px;height:32px;margin:2px}
   .pill{min-height:32px;padding:8px 12px}
-  
+
   /* Swipe gestures indicator */
   .swipe-hint{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--card);padding:8px 16px;border-radius:20px;font-size:12px;color:var(--muted);border:1px solid var(--border);opacity:0.8;z-index:99}
-  
+
   /* Haptic feedback simulation */
   .haptic-feedback{animation:haptic 0.1s ease}
   @keyframes haptic{0%{transform:scale(1)}50%{transform:scale(0.98)}100%{transform:scale(1)}}
@@ -156,7 +155,7 @@
       </select>
     </div>
     <textarea id="content" rows="4" placeholder="Not yaz… (Ses komutları: 'not ekle', 'temizle', 'ara')"></textarea>
-    
+
     <!-- Color Picker -->
     <div class="color-picker">
       <div class="color-dot" style="background:#fff" data-color="#fff" onclick="selectColor('#fff')"></div>
@@ -166,7 +165,7 @@
       <div class="color-dot" style="background:#bee3f8" data-color="#bee3f8" onclick="selectColor('#bee3f8')"></div>
       <div class="color-dot" style="background:#e9d8fd" data-color="#e9d8fd" onclick="selectColor('#e9d8fd')"></div>
     </div>
-    
+
     <div class="row" style="justify-content:space-between;margin-top:8px">
       <div class="row">
         <button onclick="addNote()" class="btn-primary" title="Not ekle (Ctrl+Enter)">📝 Not ekle</button>
@@ -269,7 +268,7 @@ function showInstallBanner() {
       </div>
     `;
     document.body.appendChild(installBanner);
-    
+
     setTimeout(() => {
       if (installBanner.parentElement) {
         installBanner.remove();
@@ -297,17 +296,17 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
   recognition.continuous = false;
   recognition.interimResults = false;
   recognition.lang = 'tr-TR';
-  
+
   recognition.onresult = function(event) {
     const transcript = event.results[0][0].transcript.toLowerCase();
     handleVoiceCommand(transcript);
   };
-  
+
   recognition.onerror = function(event) {
     showToast('Ses tanıma hatası: ' + event.error, 'danger');
     hideVoiceStatus();
   };
-  
+
   recognition.onend = function() {
     isListening = false;
     hideVoiceStatus();
@@ -315,10 +314,19 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
   };
 }
 
-// Utility functions
-function save() { 
-  localStorage.setItem(KEY, JSON.stringify(notes)); 
-  render(); 
+// Note: Debounced save for localStorage optimization.
+let saveTimeout;
+function save() {
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(() => {
+    localStorage.setItem(KEY, JSON.stringify(notes));
+  }, 300); // 300ms bekle
+}
+
+// Immediate save for specific actions if needed.
+function saveNow() {
+  clearTimeout(saveTimeout);
+  localStorage.setItem(KEY, JSON.stringify(notes));
 }
 
 function uid() { 
@@ -347,15 +355,15 @@ function addNote() {
   const c = content.value.trim();
   const g = tags.value.trim();
   const cat = category.value;
-  
+
   if (!t && !c) {
     showToast("Boş not eklenemez", "warning");
     return;
   }
-  
+
   // Add haptic feedback for mobile
   addHapticFeedback(event?.target);
-  
+
   const note = {
     id: uid(),
     title: t,
@@ -368,7 +376,7 @@ function addNote() {
     ts: Date.now(),
     updated: Date.now()
   };
-  
+
   notes.unshift(note);
   clearForm();
   save();
@@ -378,28 +386,28 @@ function addNote() {
 function editNote(id) {
   const note = notes.find(n => n.id === id);
   if (!note) return;
-  
+
   editingId = id;
   document.getElementById('editTitle').value = note.title || '';
   document.getElementById('editContent').value = note.content || '';
   document.getElementById('editTags').value = note.tags || '';
   document.getElementById('editCategory').value = note.category || '';
-  
+
   showModal('editModal');
 }
 
 function saveEdit() {
   if (!editingId) return;
-  
+
   const note = notes.find(n => n.id === editingId);
   if (!note) return;
-  
+
   note.title = document.getElementById('editTitle').value.trim();
   note.content = document.getElementById('editContent').value.trim();
   note.tags = document.getElementById('editTags').value.trim();
   note.category = document.getElementById('editCategory').value;
   note.updated = Date.now();
-  
+
   save();
   closeModal('editModal');
   showToast("Not güncellendi! ✅", "success");
@@ -486,7 +494,7 @@ function setFilter(filter) {
 // Voice commands
 function handleVoiceCommand(transcript) {
   hideVoiceStatus();
-  
+
   if (transcript.includes('not ekle') || transcript.includes('kaydet')) {
     addNote();
   } else if (transcript.includes('temizle') || transcript.includes('sil')) {
@@ -517,12 +525,12 @@ function startVoiceNote() {
     showToast("Ses tanıma bu tarayıcıda desteklenmiyor", "danger");
     return;
   }
-  
+
   if (isListening) {
     recognition.stop();
     return;
   }
-  
+
   isListening = true;
   showVoiceStatus();
   updateVoiceButton();
@@ -534,23 +542,23 @@ function toggleVoiceSearch() {
     showToast("Ses tanıma bu tarayıcıda desteklenmiyor", "danger");
     return;
   }
-  
+
   if (isListening) {
     recognition.stop();
     return;
   }
-  
+
   isListening = true;
   showVoiceStatus();
   updateVoiceButton();
-  
+
   recognition.onresult = function(event) {
     const transcript = event.results[0][0].transcript;
     document.getElementById('q').value = transcript;
     doSearch();
     showToast(`"${transcript}" aranıyor...`, "success");
   };
-  
+
   recognition.start();
 }
 
@@ -574,7 +582,7 @@ function showToast(message, type = 'success') {
   toast.className = `toast ${type}`;
   toast.textContent = message;
   document.body.appendChild(toast);
-  
+
   setTimeout(() => toast.classList.add('show'), 100);
   setTimeout(() => {
     toast.classList.remove('show');
@@ -602,7 +610,7 @@ function showStats() {
   const archived = notes.filter(n => n.archived).length;
   const categories = {};
   const tagStats = {};
-  
+
   notes.forEach(note => {
     if (note.category) {
       categories[note.category] = (categories[note.category] || 0) + 1;
@@ -616,11 +624,11 @@ function showStats() {
       });
     }
   });
-  
+
   const topTags = Object.entries(tagStats)
     .sort(([,a], [,b]) => b - a)
     .slice(0, 5);
-  
+
   document.getElementById('statsContent').innerHTML = `
     <div class="stats">
       <div class="stat-item">
@@ -636,14 +644,14 @@ function showStats() {
         <div>Arşivlenmiş</div>
       </div>
     </div>
-    
+
     <h4>📊 Kategoriler</h4>
     ${Object.entries(categories).map(([cat, count]) => 
       `<div class="row" style="justify-content:space-between;margin:5px 0">
         <span>${cat}</span><span class="pill">${count}</span>
       </div>`
     ).join('') || '<p class="muted">Henüz kategori yok</p>'}
-    
+
     <h4>🏷️ En Çok Kullanılan Etiketler</h4>
     ${topTags.map(([tag, count]) => 
       `<div class="row" style="justify-content:space-between;margin:5px 0">
@@ -651,7 +659,7 @@ function showStats() {
       </div>`
     ).join('') || '<p class="muted">Henüz etiket yok</p>'}
   `;
-  
+
   showModal('statsModal');
 }
 
@@ -671,7 +679,7 @@ function exportNotes() {
 function importNotes() {
   const file = event.target.files[0];
   if (!file) return;
-  
+
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
@@ -716,7 +724,7 @@ function render() {
   let filtered = notes.filter(n => {
     const searchMatch = !query || (n.title + " " + n.content + " " + (n.tags || "") + " " + (n.category || ""))
       .toLowerCase().includes(query);
-    
+
     switch (currentFilter) {
       case 'pinned': return searchMatch && n.pinned && !n.archived;
       case 'archived': return searchMatch && n.archived;
@@ -724,12 +732,12 @@ function render() {
       default: return searchMatch && !n.archived;
     }
   });
-  
+
   // Sorting
   const sortBy = document.getElementById('sortBy').value;
   filtered.sort((a, b) => {
     if (a.pinned !== b.pinned) return b.pinned - a.pinned;
-    
+
     switch (sortBy) {
       case 'oldest': return a.ts - b.ts;
       case 'title': return (a.title || '').localeCompare(b.title || '');
@@ -737,9 +745,9 @@ function render() {
       default: return b.ts - a.ts;
     }
   });
-  
+
   document.getElementById('count').textContent = `${filtered.length} not`;
-  
+
   list.innerHTML = filtered.map(n => `
     <div class="card note-card ${n.pinned ? 'pinned' : ''} ${n.archived ? 'archived' : ''}" 
          style="background:${n.color || '#fff'}">
@@ -762,10 +770,10 @@ function render() {
           <button class="light" onclick="removeNote('${n.id}')" title="Sil">🗑️</button>
         </div>
       </div>
-      
+
       <h4 style="margin:.3rem 0">${escape(n.title || 'Başlıksız')}</h4>
       <div class="note-content muted">${escape(n.content).slice(0, 200)}${n.content.length > 200 ? '...' : ''}</div>
-      
+
       <div class="row" style="justify-content:space-between;margin-top:8px;font-size:12px">
         <span class="muted">📅 ${formatDate(n.ts)}</span>
         ${n.updated !== n.ts ? `<span class="muted">✏️ ${formatDate(n.updated)}</span>` : ''}
@@ -787,31 +795,31 @@ document.addEventListener('keydown', function(e) {
     e.preventDefault();
     quickAdd();
   }
-  
+
   // Ctrl+F - Focus search
   if (e.ctrlKey && e.key === 'f') {
     e.preventDefault();
     document.getElementById('q').focus();
   }
-  
+
   // Ctrl+Shift+V - Voice search
   if (e.ctrlKey && e.shiftKey && e.key === 'V') {
     e.preventDefault();
     toggleVoiceSearch();
   }
-  
+
   // Ctrl+Shift+N - Voice note
   if (e.ctrlKey && e.shiftKey && e.key === 'N') {
     e.preventDefault();
     startVoiceNote();
   }
-  
+
   // Ctrl+Enter - Add note
   if (e.ctrlKey && e.key === 'Enter') {
     e.preventDefault();
     addNote();
   }
-  
+
   // Escape - Clear form
   if (e.key === 'Escape') {
     clearForm();
@@ -828,17 +836,17 @@ document.addEventListener('touchstart', function(e) {
 
 document.addEventListener('touchend', function(e) {
   if (!e.target.closest('.note-card')) return;
-  
+
   const touchEndX = e.changedTouches[0].clientX;
   const touchEndY = e.changedTouches[0].clientY;
   const deltaX = touchStartX - touchEndX;
   const deltaY = Math.abs(touchStartY - touchEndY);
-  
+
   // Horizontal swipe with minimum distance and not too much vertical movement
   if (Math.abs(deltaX) > 100 && deltaY < 50) {
     const noteCard = e.target.closest('.note-card');
     const noteId = noteCard.querySelector('[onclick*="removeNote"]')?.onclick.toString().match(/'([^']+)'/)?.[1];
-    
+
     if (deltaX > 0 && noteId) { // Swipe left to delete
       noteCard.classList.add('haptic-feedback');
       setTimeout(() => {
@@ -865,11 +873,11 @@ function addHapticFeedback(element) {
 if (isMobile && recognition) {
   recognition.continuous = true; // Better for mobile
   recognition.interimResults = true;
-  
+
   let interimTranscript = '';
   recognition.onresult = function(event) {
     let finalTranscript = '';
-    
+
     for (let i = event.resultIndex; i < event.results.length; i++) {
       if (event.results[i].isFinal) {
         finalTranscript += event.results[i][0].transcript;
@@ -877,11 +885,11 @@ if (isMobile && recognition) {
         interimTranscript = event.results[i][0].transcript;
       }
     }
-    
+
     if (finalTranscript) {
       handleVoiceCommand(finalTranscript.toLowerCase());
     }
-    
+
     // Show interim results
     if (interimTranscript && document.getElementById('speechStatus').style.display === 'block') {
       document.getElementById('speechStatus').innerHTML = `🎤 "${interimTranscript}"`;
