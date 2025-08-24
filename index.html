@@ -1,16 +1,116 @@
-<!DOCTYPE html>
-<html>
-
+<!doctype html>
+<html lang="tr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>replit</title>
-  <link href="style.css" rel="stylesheet" type="text/css" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kendime — Not</title>
+<style>
+  :root{--accent:#ff7a00;--bg:#f7f7f7;--fg:#111;--card:#fff;--muted:#666}
+  *{box-sizing:border-box} body{margin:0;font:16px/1.4 system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--fg)}
+  header{position:sticky;top:0;background:#fff;border-bottom:1px solid #eee;padding:10px 14px;display:flex;gap:10px;align-items:center;z-index:5}
+  .logo{width:36px;height:36px;border-radius:10px;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:700}
+  .title{font-weight:700}
+  .search{display:flex;gap:8px;flex:1}
+  .search input{flex:1;padding:10px;border:1px solid #ddd;border-radius:999px}
+  .wrap{max-width:900px;margin:0 auto;padding:14px}
+  .card{background:var(--card);border:1px solid #e9e9e9;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px}
+  .grid{display:grid;gap:12px}
+  @media(min-width:720px){.grid{grid-template-columns:1fr 1fr 1fr}}
+  input,textarea,button{font:inherit}
+  input,textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px}
+  button{padding:10px 12px;border:0;border-radius:10px;background:#111;color:#fff}
+  .light{background:#eee;color:#111}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .pill{padding:6px 10px;border-radius:999px;background:#eee;color:#111}
+  .muted{color:var(--muted)}
+</style>
 </head>
-
 <body>
-  Hello world
-  <script src="script.js"></script>
-</body>
+<header>
+  <div class="logo">K</div>
+  <div class="title">Kendime</div>
+  <form class="search" onsubmit="event.preventDefault();doSearch()">
+    <input id="q" placeholder="Notlarda ara" oninput="doSearch()">
+    <button class="light" type="submit">Ara</button>
+  </form>
+  <button class="light" onclick="toggleTheme()">🌓</button>
+</header>
 
+<div class="wrap">
+  <div class="card" style="margin-bottom:12px">
+    <div class="row">
+      <input id="title" placeholder="Başlık">
+      <input id="tags" placeholder="Etiketler (virgülle)">
+    </div>
+    <textarea id="content" rows="4" placeholder="Not yaz…"></textarea>
+    <div class="row" style="justify-content:space-between;margin-top:8px">
+      <div class="row">
+        <button onclick="addNote()" style="background:var(--accent)">Not ekle</button>
+        <button class="light" onclick="clearForm()">Temizle</button>
+      </div>
+      <span id="count" class="muted"></span>
+    </div>
+  </div>
+
+  <div id="list" class="grid"></div>
+</div>
+
+<script>
+const KEY="kendime_notes_v1";
+let notes = JSON.parse(localStorage.getItem(KEY)||"[]");
+let query = "";
+
+function save(){ localStorage.setItem(KEY, JSON.stringify(notes)); render(); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2); }
+
+function addNote(){
+  const t = title.value.trim(), c = content.value.trim(), g = tags.value.trim();
+  if(!t && !c){ alert("Boş not eklenemez"); return; }
+  notes.unshift({id:uid(), title:t, content:c, tags:g, pinned:false, ts:Date.now()});
+  clearForm(); save();
+}
+function clearForm(){ title.value=""; content.value=""; tags.value=""; }
+
+function removeNote(id){ notes = notes.filter(n=>n.id!==id); save(); }
+function togglePin(id){ const n=notes.find(n=>n.id===id); if(n){ n.pinned=!n.pinned; save(); } }
+
+function doSearch(){ query = q.value.toLowerCase(); render(); }
+
+function render(){
+  const list = document.getElementById("list");
+  const filtered = notes.filter(n=>{
+    const hay=(n.title+" "+n.content+" "+(n.tags||"")).toLowerCase();
+    return hay.includes(query);
+  }).sort((a,b)=> (b.pinned-a.pinned) || (b.ts-a.ts));
+  count.textContent = `${filtered.length} not`;
+  list.innerHTML = filtered.map(n=>`
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <span class="pill">${(n.tags||'').split(',')[0]||'Not'}</span>
+        <div class="row">
+          <button class="light" onclick="togglePin('${n.id}')">${n.pinned?'📌':'📍'}</button>
+          <button class="light" onclick="removeNote('${n.id}')">Sil</button>
+        </div>
+      </div>
+      <h4 style="margin:.3rem 0">${escape(n.title||'Başlıksız')}</h4>
+      <div class="muted" style="white-space:pre-wrap">${escape(n.content)}</div>
+    </div>`).join('');
+}
+function escape(s){return s.replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+
+function toggleTheme(){
+  const dark = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()==='#121212';
+  if(dark){ setVars('#f7f7f7','#111','#fff','#666'); }
+  else{ setVars('#121212','#eee','#1e1e1e','#aaa'); }
+}
+function setVars(bg,fg,card,muted){
+  document.documentElement.style.setProperty('--bg',bg);
+  document.documentElement.style.setProperty('--fg',fg);
+  document.documentElement.style.setProperty('--card',card);
+  document.documentElement.style.setProperty('--muted',muted);
+}
+
+render();
+</script>
+</body>
 </html>
