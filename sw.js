@@ -1,5 +1,4 @@
-
-const CACHE_NAME = 'kendime-v2';
+const CACHE_NAME = 'kendime-v1';
 const urlsToCache = [
   '/',
   '/index.html',

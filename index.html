@@ -243,6 +243,15 @@ let touchStartX = 0;
 let touchStartY = 0;
 let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
+// Service Worker cache name
+const CACHE_NAME = 'kendime-v1';
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/icon.png'
+];
+
 // PWA install prompt
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
