@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="tr">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kendime – İkon Üretici</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #151922;
+      --text: #e9edf1;
+      --accent: #ff7a00;
+      /* turuncu */
+    }
+
+    html,
+    body {
+      height: 100%
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #0c1016 0%, #0b0e13 100%);
+      color: var(--text);
+      font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      width: min(980px, 95vw);
+      background: var(--panel);
+      border: 1px solid #222a36;
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+      display: grid;
+      grid-template-columns: 480px 1fr;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    @media (max-width:930px) {
+      .card {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .canvas-wrap {
+      background: #0b0f16;
+      border: 1px solid #1f2734;
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    canvas {
+      width: 440px;
+      height: 440px;
+      image-rendering: crisp-edges;
+      border-radius: 22%
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid #2a3342;
+      background: #121723;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn:hover {
+      border-color: #364153
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: #081018;
+      border-color: #f06b00
+    }
+
+    .muted {
+      opacity: .8
+    }
+
+    .chip {
+      background: #0f1420;
+      border: 1px solid #222a36;
+      border-radius: 999px;
+      padding: 6px 10px
+    }
+
+    .title {
+      font-weight: 800;
+      letter-spacing: .3px;
+      font-size: 16px
+    }
+
+    .hint {
+      font-size: 12px;
+      opacity: .7
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <div class="canvas-wrap">
+      <canvas id="icon" width="1024" height="1024"></canvas>
+    </div>
+    <div class="panel">
+      <div class="title">Kendime Uygulaması – Modern İkon</div>
+      <div class="row">
+        <span class="chip">Arka plan: Turuncu</span>
+        <span class="chip">Büyük “K”</span>
+        <span class="chip">Mini not defteri • kalem • mikrofon</span>
+      </div>
+
+      <div class="row">
+        <button class="btn" id="rerender">Yeniden çiz</button>
+        <button class="btn" id="toggleGlow">Işıltıyı Aç/Kapat</button>
+      </div>
+
+      <div class="row">
+        <button class="btn primary" id="dl192">192 PNG indir</button>
+        <button class="btn primary" id="dl512">512 PNG indir</button>
+      </div>
+
+      <div class="hint">
+        İndirilen dosyaları <strong>manifest.json</strong> ve <strong>pwa-assets</strong> içine yerleştirip linkleri
+        güncelleyin.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CANVAS = document.getElementById('icon');
+    const CTX = CANVAS.getContext('2d');
+    let glow = true;
+
+    function rr(x, y, w, h, r) { // rounded rect
+      const r2 = Math.min(r, w / 2, h / 2);
+      CTX.beginPath();
+      CTX.moveTo(x + r2, y);
+      CTX.arcTo(x + w, y, x + w, y + h, r2);
+      CTX.arcTo(x + w, y + h, x, y + h, r2);
+      CTX.arcTo(x, y + h, x, y, r2);
+      CTX.arcTo(x, y, x + w, y, r2);
+      CTX.closePath();
+    }
+
+    function drawBackground() {
+      // turuncu düz + hafif radial highlight
+      const g = CTX.createLinearGradient(0, 0, 0, CANVAS.height);
+      g.addColorStop(0, '#ff8a1f');
+      g.addColorStop(1, '#ff6f00');
+      CTX.fillStyle = g;
+      rr(64, 64, 896, 896, 180); CTX.fill();
+
+      // iç kenara yumuşak ışık/derinlik
+      if (glow) {
+        const rg = CTX.createRadialGradient(512, 350, 80, 512, 350, 520);
+        rg.addColorStop(0, 'rgba(255,255,255,.23)');
+        rg.addColorStop(1, 'rgba(255,255,255,0)');
+        CTX.fillStyle = rg;
+        rr(64, 64, 896, 896, 180); CTX.fill();
+      }
+    }
+
+    function drawBigK() {
+      // büyük K harfi (geometrik şekillerle keskin)
+      CTX.save();
+      CTX.fillStyle = '#ffffff';
+      CTX.translate(310, 330); // konum
+      CTX.scale(1, 1);
+      // Dikey kolon
+      CTX.fillRect(0, 0, 90, 520);
+      // Üst diyagonal
+      CTX.beginPath();
+      CTX.moveTo(115, 205);
+      CTX.lineTo(350, 0);
+      CTX.lineTo(430, 85);
+      CTX.lineTo(210, 270);
+      CTX.closePath(); CTX.fill();
+      // Alt diyagonal
+      CTX.beginPath();
+      CTX.moveTo(210, 290);
+      CTX.lineTo(440, 520);
+      CTX.lineTo(355, 600);
+      CTX.lineTo(115, 360);
+      CTX.closePath(); CTX.fill();
+      CTX.restore();
+    }
+
+    function drawMiniIcons() {
+      // sağ üst köşe: küçük defter + kalem + mikrofon (minimal)
+      const ox = 670, oy = 210;
+
+      // not defteri
+      CTX.save();
+      CTX.translate(ox, oy);
+      CTX.fillStyle = '#fff';
+      rr(0, 0, 120, 95, 18); CTX.fill();
+      // sol spiral bandı
+      CTX.fillStyle = '#e6e9ee';
+      rr(-10, 0, 22, 95, 14); CTX.fill();
+      // satırlar
+      CTX.strokeStyle = '#d4d9e2';
+      CTX.lineWidth = 3;
+      for (let i = 18; i <= 76; i += 14) {CTX.beginPath(); CTX.moveTo(18, i); CTX.lineTo(100, i); CTX.stroke();}
+      CTX.restore();
+
+      // kalem (defterin altına 45°)
+      CTX.save();
+      CTX.translate(ox + 85, oy + 95);
+      CTX.rotate(-Math.PI / 4.8);
+      // gövde
+      CTX.fillStyle = '#222';
+      rr(-12, -6, 110, 12, 6); CTX.fill();
+      CTX.fillStyle = '#ffe07a';
+      rr(-12, -6, 110, 12, 6); CTX.fill();
+      // uç
+      CTX.beginPath();
+      CTX.moveTo(100, -6); CTX.lineTo(122, 0); CTX.lineTo(100, 6); CTX.closePath();
+      CTX.fillStyle = '#e6c997'; CTX.fill();
+      // uç çizgisi
+      CTX.strokeStyle = '#b48d56'; CTX.lineWidth = 2;
+      CTX.beginPath(); CTX.moveTo(110, -5); CTX.lineTo(110, 5); CTX.stroke();
+      CTX.restore();
+
+      // mikrofon (daha da küçük)
+      CTX.save();
+      CTX.translate(ox + 132, oy - 10);
+      // kapsül
+      CTX.fillStyle = '#ffffff';
+      rr(-14, -30, 28, 60, 14); CTX.fill();
+      // gövde
+      CTX.fillRect(-5, 30, 10, 20);
+      // ayak
+      CTX.fillRect(-18, 48, 36, 8);
+      CTX.restore();
+    }
+
+    function drawAll() {
+      CTX.clearRect(0, 0, 1024, 1024);
+      drawBackground();
+      drawBigK();
+      drawMiniIcons();
+    }
+
+    function download(size) {
+      // export 192/512: ölçekleyip indir
+      const out = document.createElement('canvas');
+      out.width = size; out.height = size;
+      const octx = out.getContext('2d');
+      octx.drawImage(CANVAS, 0, 0, size, size);
+      const url = out.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = url; a.download = `kendime-icon-${size}.png`;
+      document.body.appendChild(a); a.click(); a.remove();
+    }
+
+    drawAll();
+
+    // UI
+    document.getElementById('dl192').onclick = () => download(192);
+    document.getElementById('dl512').onclick = () => download(512);
+    document.getElementById('rerender').onclick = () => drawAll();
+    document.getElementById('toggleGlow').onclick = () => {glow = !glow; drawAll();};
+  </script>
+</body>
+
+</html>
