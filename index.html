@@ -188,6 +188,17 @@
   </div>
 </header>
 
+<!-- Quick Action Buttons -->
+<div class="wrap" style="padding-top:8px;padding-bottom:0">
+  <div class="card" style="margin-bottom:8px">
+    <div class="row" style="justify-content:center;gap:12px">
+      <button onclick="addNote()" class="btn-primary" title="Not ekle (Ctrl+Enter)">📝 Not ekle</button>
+      <button class="light" onclick="clearForm()" title="Temizle (Esc)">🗑️ Temizle</button>
+      <button class="voice-btn" onclick="startVoiceNote()" title="Sesli not (Ctrl+Shift+N)">🎤 Sesli Not</button>
+    </div>
+  </div>
+</div>
+
 <div class="wrap">
   <!-- Hidden Filter and Sort Controls (accessible via menu) -->
   <div id="filterControls" class="filter-controls" style="display:none">
@@ -236,12 +247,7 @@
       <div class="color-dot" style="background:#e9d8fd" data-color="#e9d8fd" onclick="selectColor('#e9d8fd')"></div>
     </div>
 
-    <div class="row" style="justify-content:space-between;margin-top:8px">
-      <div class="row">
-        <button onclick="addNote()" class="btn-primary" title="Not ekle (Ctrl+Enter)">📝 Not ekle</button>
-        <button class="light" onclick="clearForm()" title="Temizle (Esc)">🗑️ Temizle</button>
-        <button class="voice-btn" onclick="startVoiceNote()" title="Sesli not (Ctrl+Shift+N)">🎤 Sesli Not</button>
-      </div>
+    <div class="row" style="justify-content:flex-end;margin-top:8px">
       <span id="count" class="muted"></span>
     </div>
   </div>
