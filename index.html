@@ -18,9 +18,11 @@
   .logo{width:36px;height:36px;border-radius:10px;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:700}
   .title{font-weight:700}
   .search{display:flex;gap:8px;flex:1;position:relative}
-  .search input{flex:1;padding:10px 40px 10px 10px;border:1px solid #ddd;border-radius:999px;transition:all 0.2s}
-  .search input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(255,122,0,0.1)}
-  .voice-btn{position:absolute;right:50px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:5px;border-radius:50%;transition:all 0.2s}
+  .search input{flex:1;padding:12px 120px 12px 40px;border:1px solid #ddd;border-radius:25px;transition:all 0.2s;font-size:16px;background:#f8f9fa}
+  .search input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(255,122,0,0.1);background:#fff}
+  .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:18px}
+  .voice-btn{position:absolute;right:80px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:8px;border-radius:50%;transition:all 0.2s;font-size:18px}
+  .search-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:14px;font-weight:600}
   .voice-btn:hover{background:rgba(255,122,0,0.1)}
   .voice-btn.listening{background:var(--danger);color:white;animation:pulse 1s infinite}
   @keyframes pulse{0%,100%{transform:translateY(-50%) scale(1)}50%{transform:translateY(-50%) scale(1.1)}}
@@ -110,9 +112,10 @@
   <div class="logo">K</div>
   <div class="title">Kendime</div>
   <form class="search" onsubmit="event.preventDefault();doSearch()">
-    <input id="q" placeholder="Notlarda ara (Ctrl+F)" oninput="doSearch()">
-    <button type="button" class="voice-btn" onclick="toggleVoiceSearch()" title="Sesli arama (Ctrl+Shift+V)">🎤</button>
-    <button class="light" type="submit">Ara</button>
+    <span class="search-icon">🔍</span>
+    <input id="q" placeholder="Notları ara..." oninput="doSearch()">
+    <button type="button" class="voice-btn" onclick="toggleVoiceSearch()" title="Sesli arama">🎤</button>
+    <button class="search-btn" type="submit">Ara</button>
   </form>
   <button class="light" onclick="toggleTheme()" title="Tema değiştir">🌓</button>
   <button class="light" onclick="showStats()" title="İstatistikler">📊</button>
@@ -153,7 +156,27 @@
         <option value="Fikir">💡 Fikir</option>
         <option value="Görev">✅ Görev</option>
         <option value="Önemli">⭐ Önemli</option>
+        <option value="Randevu">📅 Randevu</option>
+        <option value="Belge">📄 Belge</option>
+        <option value="Alışveriş">🛒 Alışveriş</option>
+        <option value="Sağlık">🏥 Sağlık</option>
+        <option value="Eğitim">📚 Eğitim</option>
+        <option value="Seyahat">✈️ Seyahat</option>
       </select>
+    </div>
+
+    <!-- Calendar integration for appointments -->
+    <div id="appointmentFields" style="display:none;margin-top:8px">
+      <div class="row">
+        <input type="datetime-local" id="appointmentDate" placeholder="Randevu tarihi">
+        <select id="reminderTime">
+          <option value="0">Hatırlatma yok</option>
+          <option value="15">15 dakika önce</option>
+          <option value="30">30 dakika önce</option>
+          <option value="60">1 saat önce</option>
+          <option value="1440">1 gün önce</option>
+        </select>
+      </div>
     </div>
     <textarea id="content" rows="4" placeholder="Not yaz… (Ses komutları: 'not ekle', 'temizle', 'ara')"></textarea>
 
@@ -172,9 +195,14 @@
         <button onclick="addNote()" class="btn-primary" title="Not ekle (Ctrl+Enter)">📝 Not ekle</button>
         <button class="light" onclick="clearForm()" title="Temizle (Esc)">🗑️ Temizle</button>
         <button class="voice-btn" onclick="startVoiceNote()" title="Sesli not (Ctrl+Shift+N)">🎤 Sesli Not</button>
+        <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt,.jpg,.png,.jpeg" multiple style="display:none" onchange="handleFileUpload()">
+        <button class="light" onclick="document.getElementById('fileInput').click()" title="Dosya ekle">📎 Dosya Ekle</button>
       </div>
       <span id="count" class="muted"></span>
     </div>
+
+    <!-- File attachments display -->
+    <div id="attachments" class="row" style="margin-top:8px;display:none;flex-wrap:wrap"></div>
   </div>
 
   <!-- Notes List -->
@@ -388,23 +416,74 @@ function addNote() {
   // Add haptic feedback for mobile
   addHapticFeedback(event?.target);
 
+  // AI-powered auto categorization and tagging
+  const autoData = aiAnalyzeContent(t + " " + c);
+
   const note = {
     id: uid(),
-    title: t,
+    title: t || autoData.suggestedTitle,
     content: c,
-    tags: g,
-    category: cat,
+    tags: g || autoData.suggestedTags,
+    category: cat || autoData.suggestedCategory,
     pinned: false,
     archived: false,
     color: selectedColor,
     ts: Date.now(),
-    updated: Date.now()
+    updated: Date.now(),
+    attachments: []
   };
 
   notes.unshift(note);
   clearForm();
   save();
-  showToast("Not eklendi! 📝", "success");
+  showToast(`Not eklendi! 🤖 Kategori: ${note.category}`, "success");
+}
+
+// AI Content Analysis
+function aiAnalyzeContent(text) {
+  const content = text.toLowerCase();
+  
+  // Smart title generation
+  const suggestedTitle = content.length > 50 ? content.slice(0, 50) + "..." : content.slice(0, 30);
+  
+  // Smart categorization
+  let suggestedCategory = "";
+  if (content.includes("randevu") || content.includes("toplantı") || content.includes("görüşme")) {
+    suggestedCategory = "📅 Randevu";
+  } else if (content.includes("görev") || content.includes("yapılacak") || content.includes("tamamla")) {
+    suggestedCategory = "✅ Görev";
+  } else if (content.includes("iş") || content.includes("çalışma") || content.includes("proje")) {
+    suggestedCategory = "💼 İş";
+  } else if (content.includes("fikir") || content.includes("plan") || content.includes("öneri")) {
+    suggestedCategory = "💡 Fikir";
+  } else if (content.includes("önemli") || content.includes("acil") || content.includes("dikkat")) {
+    suggestedCategory = "⭐ Önemli";
+  } else {
+    suggestedCategory = "📝 Kişisel";
+  }
+  
+  // Smart tagging
+  const suggestedTags = [];
+  const keywords = {
+    "randevu": ["randevu", "toplantı", "görüşme"],
+    "iş": ["iş", "çalışma", "proje", "müşteri"],
+    "kişisel": ["kişisel", "özel", "aile"],
+    "acil": ["acil", "önemli", "hızlı"],
+    "fikir": ["fikir", "plan", "strateji"],
+    "görev": ["görev", "yapılacak", "tamamla"]
+  };
+  
+  Object.entries(keywords).forEach(([tag, words]) => {
+    if (words.some(word => content.includes(word))) {
+      suggestedTags.push(tag);
+    }
+  });
+  
+  return {
+    suggestedTitle,
+    suggestedCategory,
+    suggestedTags: suggestedTags.join(", ")
+  };
 }
 
 function editNote(id) {
@@ -687,14 +766,39 @@ function showStats() {
   showModal('statsModal');
 }
 
-// Import/Export
+// Enhanced Import/Export
 function exportNotes() {
-  const dataStr = JSON.stringify(notes, null, 2);
-  const dataBlob = new Blob([dataStr], {type: 'application/json'});
+  // Show format selection
+  const format = prompt("Hangi formatta dışa aktarmak istiyorsunuz?\n1. JSON (tam veri)\n2. TXT (sadece metin)\n3. CSV (tablo)", "1");
+  
+  let dataStr, fileName, mimeType;
+  
+  switch(format) {
+    case "2":
+      dataStr = notes.map(n => `${n.title || 'Başlıksız'}\n${n.content}\nKategori: ${n.category || 'Yok'}\nTarih: ${formatDate(n.ts)}\n${'='.repeat(50)}\n`).join('\n');
+      fileName = `kendime-notlar-${new Date().toISOString().split('T')[0]}.txt`;
+      mimeType = 'text/plain';
+      break;
+    case "3":
+      const csvHeader = "Başlık,İçerik,Kategori,Etiketler,Tarih,Güncelleme\n";
+      const csvData = notes.map(n => 
+        `"${(n.title || '').replace(/"/g, '""')}","${n.content.replace(/"/g, '""')}","${n.category || ''}","${n.tags || ''}","${formatDate(n.ts)}","${formatDate(n.updated)}"`
+      ).join('\n');
+      dataStr = csvHeader + csvData;
+      fileName = `kendime-notlar-${new Date().toISOString().split('T')[0]}.csv`;
+      mimeType = 'text/csv';
+      break;
+    default:
+      dataStr = JSON.stringify(notes, null, 2);
+      fileName = `kendime-notlar-${new Date().toISOString().split('T')[0]}.json`;
+      mimeType = 'application/json';
+  }
+  
+  const dataBlob = new Blob([dataStr], {type: mimeType});
   const url = URL.createObjectURL(dataBlob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `kendime-notlar-${new Date().toISOString().split('T')[0]}.json`;
+  link.download = fileName;
   link.click();
   URL.revokeObjectURL(url);
   showToast("Notlar dışa aktarıldı! 💾", "success");
@@ -707,16 +811,69 @@ function importNotes() {
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
-      const importedNotes = JSON.parse(e.target.result);
-      if (Array.isArray(importedNotes)) {
+      let importedNotes = [];
+      
+      if (file.name.endsWith('.json')) {
+        const data = JSON.parse(e.target.result);
+        importedNotes = Array.isArray(data) ? data : [data];
+      } else if (file.name.endsWith('.txt')) {
+        // Simple text import - each line becomes a note
+        const lines = e.target.result.split('\n').filter(line => line.trim());
+        importedNotes = lines.map(line => ({
+          id: uid(),
+          title: line.slice(0, 50),
+          content: line,
+          category: "İçe Aktarılan",
+          tags: "import",
+          ts: Date.now(),
+          updated: Date.now(),
+          pinned: false,
+          archived: false,
+          color: "#fff"
+        }));
+      } else if (file.name.endsWith('.csv')) {
+        // CSV import
+        const lines = e.target.result.split('\n');
+        const headers = lines[0].split(',');
+        
+        for (let i = 1; i < lines.length; i++) {
+          const values = lines[i].split(',');
+          if (values.length >= 2) {
+            importedNotes.push({
+              id: uid(),
+              title: values[0]?.replace(/"/g, '') || 'İçe Aktarılan',
+              content: values[1]?.replace(/"/g, '') || '',
+              category: values[2]?.replace(/"/g, '') || 'İçe Aktarılan',
+              tags: values[3]?.replace(/"/g, '') || 'import',
+              ts: Date.now(),
+              updated: Date.now(),
+              pinned: false,
+              archived: false,
+              color: "#fff"
+            });
+          }
+        }
+      }
+      
+      if (importedNotes.length > 0) {
+        // AI auto-categorization for imported notes
+        importedNotes.forEach(note => {
+          if (!note.category || note.category === 'İçe Aktarılan') {
+            const autoData = aiAnalyzeContent(note.title + " " + note.content);
+            note.category = autoData.suggestedCategory;
+            note.tags = autoData.suggestedTags;
+          }
+        });
+        
         notes = [...importedNotes, ...notes];
         save();
-        showToast(`${importedNotes.length} not içe aktarıldı! 📂`, "success");
+        render();
+        showToast(`${importedNotes.length} not içe aktarıldı ve kategorilendi! 🤖📂`, "success");
       } else {
-        showToast("Geçersiz dosya formatı", "danger");
+        showToast("İçe aktarılacak geçerli not bulunamadı", "warning");
       }
     } catch (error) {
-      showToast("Dosya okuma hatası", "danger");
+      showToast("Dosya okuma hatası: " + error.message, "danger");
     }
   };
   reader.readAsText(file);
@@ -937,6 +1094,81 @@ if (isMobile && notes.length > 0) {
       hint.style.display = 'none';
     }, 3000);
   }, 2000);
+}
+
+// File upload handling
+function handleFileUpload() {
+  const files = Array.from(document.getElementById('fileInput').files);
+  const attachmentsDiv = document.getElementById('attachments');
+  
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const attachment = {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        data: e.target.result
+      };
+      
+      const attachmentElement = document.createElement('div');
+      attachmentElement.className = 'pill';
+      attachmentElement.innerHTML = `📎 ${file.name} <span onclick="removeAttachment(this)" style="margin-left:8px;cursor:pointer">✕</span>`;
+      attachmentsDiv.appendChild(attachmentElement);
+      attachmentsDiv.style.display = 'flex';
+    };
+    reader.readAsDataURL(file);
+  });
+  
+  showToast(`${files.length} dosya eklendi! 📎`, "success");
+}
+
+function removeAttachment(element) {
+  element.parentElement.remove();
+  if (document.getElementById('attachments').children.length === 0) {
+    document.getElementById('attachments').style.display = 'none';
+  }
+}
+
+// Calendar functionality
+document.getElementById('category').addEventListener('change', function() {
+  const appointmentFields = document.getElementById('appointmentFields');
+  if (this.value === 'Randevu') {
+    appointmentFields.style.display = 'block';
+  } else {
+    appointmentFields.style.display = 'none';
+  }
+});
+
+// Appointment reminders
+function checkReminders() {
+  const now = Date.now();
+  notes.forEach(note => {
+    if (note.category === 'Randevu' && note.appointmentDate && note.reminderTime) {
+      const appointmentTime = new Date(note.appointmentDate).getTime();
+      const reminderTime = appointmentTime - (note.reminderTime * 60 * 1000);
+      
+      if (now >= reminderTime && now <= reminderTime + 60000) { // 1 minute window
+        showToast(`🔔 Randevu Hatırlatması: ${note.title}`, "warning");
+        
+        // Browser notification if permitted
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification(`Randevu Hatırlatması`, {
+            body: note.title,
+            icon: "icon.png"
+          });
+        }
+      }
+    }
+  });
+}
+
+// Check reminders every minute
+setInterval(checkReminders, 60000);
+
+// Request notification permission
+if ("Notification" in window && Notification.permission === "default") {
+  Notification.requestPermission();
 }
 
 // Initialize
