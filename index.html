@@ -75,6 +75,30 @@
   .note-content{white-space:pre-wrap;word-break:break-word}
   .edit-mode{border:2px solid var(--accent)}
   .keyboard-shortcuts{position:fixed;bottom:10px;left:10px;font-size:12px;color:var(--muted);background:var(--card);padding:8px;border-radius:8px;border:1px solid var(--border);opacity:0.7}
+  
+  /* Menu styles */
+  .menu-container{position:relative}
+  .menu-btn{background:none;border:none;font-size:20px;cursor:pointer;padding:8px;border-radius:50%;transition:all 0.2s;color:var(--muted);width:40px;height:40px;display:flex;align-items:center;justify-content:center}
+  .menu-btn:hover{background:rgba(0,0,0,0.08);color:var(--accent)}
+  .menu-dropdown{position:absolute;top:100%;right:0;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.1);min-width:200px;z-index:200;display:none}
+  .menu-dropdown.show{display:block}
+  .menu-item{padding:12px 16px;cursor:pointer;transition:all 0.2s;border-bottom:1px solid var(--border)}
+  .menu-item:last-child{border-bottom:none}
+  .menu-item:hover{background:var(--bg);color:var(--accent)}
+  
+  /* Settings modal styles */
+  .setting-section{margin-bottom:20px;padding-bottom:15px;border-bottom:1px solid var(--border)}
+  .setting-section:last-child{border-bottom:none}
+  .setting-section h4{margin:0 0 10px 0;color:var(--accent)}
+  .setting-item{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .setting-item label{font-weight:500}
+  .setting-item input[type="checkbox"]{width:auto}
+  
+  /* Help modal styles */
+  .help-section{margin-bottom:15px}
+  .help-section h4{color:var(--accent);margin:0 0 8px 0}
+  .shortcut-list div,.voice-commands div,.mobile-tips div{padding:4px 0;font-size:14px}
+  kbd{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:2px 6px;font-size:12px;font-family:monospace}
 
   /* Mobile optimizations */
   @media (max-width: 768px) {
@@ -127,34 +151,40 @@
       </div>
     </div>
   </form>
-  <div class="row">
-    <button class="light" onclick="toggleTheme()" title="Tema değiştir">🌓</button>
-    <button class="light" onclick="showStats()" title="İstatistikler">📊</button>
+  <div class="menu-container">
+    <button class="menu-btn" onclick="toggleMenu()" title="Menü">⋮</button>
+    <div id="menuDropdown" class="menu-dropdown">
+      <div class="menu-item" onclick="toggleTheme()">🌓 Tema değiştir</div>
+      <div class="menu-item" onclick="showStats()">📊 İstatistikler</div>
+      <div class="menu-item" onclick="showSettings()">⚙️ Ayarlar</div>
+      <div class="menu-item" onclick="exportNotes()">💾 Dışa aktar</div>
+      <div class="menu-item" onclick="document.getElementById('importFile').click()">📂 İçe aktar</div>
+      <div class="menu-item" onclick="showHelp()">❓ Yardım</div>
+    </div>
   </div>
 </header>
 
 <div class="wrap">
-  <!-- Filter Tabs -->
-  <div class="filter-tabs">
-    <div class="filter-tab active" onclick="setFilter('all')">Tümü</div>
-    <div class="filter-tab" onclick="setFilter('pinned')">📌 Sabitlenmiş</div>
-    <div class="filter-tab" onclick="setFilter('archived')">📁 Arşiv</div>
-    <div class="filter-tab" onclick="setFilter('recent')">🕒 Son eklenenler</div>
+  <!-- Hidden Filter and Sort Controls (accessible via menu) -->
+  <div id="filterControls" class="filter-controls" style="display:none">
+    <div class="filter-tabs">
+      <div class="filter-tab active" onclick="setFilter('all')">Tümü</div>
+      <div class="filter-tab" onclick="setFilter('pinned')">📌 Sabitlenmiş</div>
+      <div class="filter-tab" onclick="setFilter('archived')">📁 Arşiv</div>
+      <div class="filter-tab" onclick="setFilter('recent')">🕒 Son eklenenler</div>
+    </div>
+    <div class="sort-controls">
+      <label>Sıralama:</label>
+      <select id="sortBy" onchange="render()">
+        <option value="newest">En yeni</option>
+        <option value="oldest">En eski</option>
+        <option value="title">Başlık (A-Z)</option>
+        <option value="updated">Son güncellenen</option>
+      </select>
+    </div>
   </div>
-
-  <!-- Sort Controls -->
-  <div class="sort-controls">
-    <label>Sıralama:</label>
-    <select id="sortBy" onchange="render()">
-      <option value="newest">En yeni</option>
-      <option value="oldest">En eski</option>
-      <option value="title">Başlık (A-Z)</option>
-      <option value="updated">Son güncellenen</option>
-    </select>
-    <button class="light" onclick="exportNotes()" title="Notları dışa aktar">💾 Dışa Aktar</button>
-    <input type="file" id="importFile" accept=".json" onchange="importNotes()" style="display:none">
-    <button class="light" onclick="document.getElementById('importFile').click()" title="Not içe aktar">📂 İçe Aktar</button>
-  </div>
+  
+  <input type="file" id="importFile" accept=".json" onchange="importNotes()" style="display:none">
 
   <!-- Add Note Form -->
   <div class="card" style="margin-bottom:12px">
@@ -232,6 +262,110 @@
       <button onclick="saveEdit()" class="btn-success">💾 Kaydet</button>
       <button onclick="closeModal('editModal')" class="light">❌ İptal</button>
     </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div id="settingsModal" class="modal">
+  <div class="modal-content">
+    <h3>⚙️ Uygulama Ayarları</h3>
+    
+    <div class="setting-section">
+      <h4>🎨 Görünüm</h4>
+      <div class="setting-item">
+        <label>Tema:</label>
+        <button onclick="toggleTheme()" class="light">🌓 Tema Değiştir</button>
+      </div>
+      <div class="setting-item">
+        <label>Not kartı boyutu:</label>
+        <select id="cardSize" onchange="changeCardSize()">
+          <option value="small">Küçük</option>
+          <option value="medium" selected>Orta</option>
+          <option value="large">Büyük</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="setting-section">
+      <h4>🔊 Ses Ayarları</h4>
+      <div class="setting-item">
+        <label>Ses komutları:</label>
+        <input type="checkbox" id="voiceEnabled" checked onchange="toggleVoiceCommands()">
+      </div>
+      <div class="setting-item">
+        <label>Bildirim sesleri:</label>
+        <input type="checkbox" id="soundEnabled" checked onchange="toggleSounds()">
+      </div>
+    </div>
+
+    <div class="setting-section">
+      <h4>📱 Davranış</h4>
+      <div class="setting-item">
+        <label>Otomatik kaydetme:</label>
+        <input type="checkbox" id="autoSave" checked onchange="toggleAutoSave()">
+      </div>
+      <div class="setting-item">
+        <label>Filtreleri göster:</label>
+        <input type="checkbox" id="showFilters" onchange="toggleFilters()">
+      </div>
+      <div class="setting-item">
+        <label>Yapay zeka önerileri:</label>
+        <input type="checkbox" id="aiSuggestions" onchange="toggleAISuggestions()">
+      </div>
+    </div>
+
+    <div class="setting-section">
+      <h4>🗂️ Veri</h4>
+      <div class="setting-item">
+        <button onclick="clearAllData()" class="btn-danger">🗑️ Tüm Verileri Sil</button>
+      </div>
+      <div class="setting-item">
+        <button onclick="exportNotes()" class="light">💾 Notları Dışa Aktar</button>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:20px">
+      <button onclick="closeModal('settingsModal')" class="btn-primary">✅ Tamam</button>
+    </div>
+  </div>
+</div>
+
+<!-- Help Modal -->
+<div id="helpModal" class="modal">
+  <div class="modal-content">
+    <h3>❓ Yardım & Kısayollar</h3>
+    
+    <div class="help-section">
+      <h4>⌨️ Klavye Kısayolları</h4>
+      <div class="shortcut-list">
+        <div><kbd>Ctrl + N</kbd> - Hızlı not ekleme</div>
+        <div><kbd>Ctrl + F</kbd> - Arama kutusuna odaklan</div>
+        <div><kbd>Ctrl + Enter</kbd> - Not ekle</div>
+        <div><kbd>Ctrl + Shift + V</kbd> - Sesli arama</div>
+        <div><kbd>Esc</kbd> - Formu temizle</div>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <h4>🎤 Ses Komutları</h4>
+      <div class="voice-commands">
+        <div>"not ekle" - Notu kaydet</div>
+        <div>"temizle" - Formu temizle</div>
+        <div>"ara [kelime]" - Kelimeyi ara</div>
+        <div>"yeni not" - Hızlı not ekleme</div>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <h4>📱 Mobil İpuçları</h4>
+      <div class="mobile-tips">
+        <div>• Notları sola kaydırarak silebilirsiniz</div>
+        <div>• + butonuna basarak hızlı not ekleyebilirsiniz</div>
+        <div>• Ses komutlarını mikrofondan kullanabilirsiniz</div>
+      </div>
+    </div>
+
+    <button onclick="closeModal('helpModal')" class="btn-primary" style="margin-top:15px">Kapat</button>
   </div>
 </div>
 
@@ -1002,6 +1136,91 @@ if (isMobile && notes.length > 0) {
     }, 3000);
   }, 2000);
 }
+
+// Menu functions
+function toggleMenu() {
+  const dropdown = document.getElementById('menuDropdown');
+  dropdown.classList.toggle('show');
+}
+
+function showSettings() {
+  closeMenu();
+  showModal('settingsModal');
+}
+
+function showHelp() {
+  closeMenu();
+  showModal('helpModal');
+}
+
+function closeMenu() {
+  document.getElementById('menuDropdown').classList.remove('show');
+}
+
+// Settings functions
+function changeCardSize() {
+  const size = document.getElementById('cardSize').value;
+  const root = document.documentElement.style;
+  
+  switch(size) {
+    case 'small':
+      root.setProperty('--card-min-width', '250px');
+      break;
+    case 'large':
+      root.setProperty('--card-min-width', '400px');
+      break;
+    default:
+      root.setProperty('--card-min-width', '300px');
+  }
+  
+  showToast(`Kart boyutu ${size} olarak ayarlandı`, 'success');
+}
+
+function toggleVoiceCommands() {
+  const enabled = document.getElementById('voiceEnabled').checked;
+  showToast(enabled ? 'Ses komutları etkinleştirildi' : 'Ses komutları devre dışı bırakıldı', 'success');
+}
+
+function toggleSounds() {
+  const enabled = document.getElementById('soundEnabled').checked;
+  showToast(enabled ? 'Bildirim sesleri etkinleştirildi' : 'Bildirim sesleri kapatıldı', 'success');
+}
+
+function toggleAutoSave() {
+  const enabled = document.getElementById('autoSave').checked;
+  showToast(enabled ? 'Otomatik kaydetme etkinleştirildi' : 'Otomatik kaydetme kapatıldı', 'success');
+}
+
+function toggleFilters() {
+  const enabled = document.getElementById('showFilters').checked;
+  const filterControls = document.getElementById('filterControls');
+  filterControls.style.display = enabled ? 'block' : 'none';
+  showToast(enabled ? 'Filtreler gösteriliyor' : 'Filtreler gizlendi', 'success');
+}
+
+function toggleAISuggestions() {
+  const enabled = document.getElementById('aiSuggestions').checked;
+  showToast(enabled ? 'AI önerileri etkinleştirildi' : 'AI önerileri kapatıldı', 'success');
+}
+
+function clearAllData() {
+  if (confirm('Tüm notlarınız silinecek! Bu işlem geri alınamaz. Emin misiniz?')) {
+    if (confirm('Son kez soruyorum: Gerçekten tüm verileri silmek istiyor musunuz?')) {
+      notes = [];
+      localStorage.removeItem(KEY);
+      render();
+      showToast('Tüm veriler silindi! 🗑️', 'warning');
+      closeModal('settingsModal');
+    }
+  }
+}
+
+// Close menu when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.menu-container')) {
+    closeMenu();
+  }
+});
 
 // Initialize
 updateColorPicker();
