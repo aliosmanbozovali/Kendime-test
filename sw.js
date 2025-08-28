@@ -1,103 +1,113 @@
 
-const CACHE_NAME = 'kendime-v2';
+const CACHE_NAME = 'kendime-v1.0.3';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/manifest.json',
-  '/sw.js'
+  '/style.css',
+  '/script.js',
+  '/manifest.json'
 ];
 
 // Install event
 self.addEventListener('install', function(event) {
-  console.log('Service Worker installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
-        console.log('Caching files...');
+        console.log('SW: Cache açıldı');
         return cache.addAll(urlsToCache);
       })
       .then(function() {
-        console.log('Service Worker installed successfully');
         return self.skipWaiting();
-      })
-      .catch(function(error) {
-        console.error('Cache failed:', error);
       })
   );
 });
 
 // Activate event
 self.addEventListener('activate', function(event) {
-  console.log('Service Worker activating...');
   event.waitUntil(
     caches.keys().then(function(cacheNames) {
       return Promise.all(
         cacheNames.map(function(cacheName) {
           if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
+            console.log('SW: Eski cache siliniyor:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     }).then(function() {
-      console.log('Service Worker activated');
       return self.clients.claim();
     })
   );
 });
 
-// Fetch event - Cache First Strategy
+// Fetch event
 self.addEventListener('fetch', function(event) {
   event.respondWith(
     caches.match(event.request)
       .then(function(response) {
-        // Cache hit - return response
+        // Cache'den döndür veya network'ten getir
         if (response) {
           return response;
         }
-
+        
         return fetch(event.request).then(function(response) {
-          // Check if we received a valid response
+          // Geçerli response kontrolü
           if (!response || response.status !== 200 || response.type !== 'basic') {
             return response;
           }
 
-          // Clone the response
+          // Response'u klonla ve cache'e ekle
           const responseToCache = response.clone();
-
           caches.open(CACHE_NAME)
             .then(function(cache) {
               cache.put(event.request, responseToCache);
             });
 
           return response;
+        }).catch(function() {
+          // Network hatası durumunda offline sayfası
+          if (event.request.destination === 'document') {
+            return caches.match('/index.html');
+          }
         });
-      })
-      .catch(function() {
-        // Fallback for offline
-        if (event.request.destination === 'document') {
-          return caches.match('/index.html');
-        }
-      })
+      }
+    )
   );
 });
 
-// Background sync for offline functionality
+// Background sync
 self.addEventListener('sync', function(event) {
   if (event.tag === 'background-sync') {
-    event.waitUntil(syncNotes());
+    event.waitUntil(
+      // Offline sırasında kaydedilen notları sync et
+      console.log('SW: Background sync çalıştırıldı')
+    );
   }
 });
 
 // Push notifications
 self.addEventListener('push', function(event) {
-  const options = {
-    body: event.data ? event.data.text() : 'Yeni bildirim',
+  let options = {
+    body: 'Yeni bildiriminiz var',
     icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%23ff7a00'/><text x='96' y='130' font-size='120' text-anchor='middle' fill='white' font-family='system-ui' font-weight='bold'>K</text></svg>",
-    badge: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%23ff7a00'/><text x='96' y='130' font-size='120' text-anchor='middle' fill='white' font-family='system-ui' font-weight='bold'>K</text></svg>",
+    badge: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect width='96' height='96' rx='20' fill='%23ff7a00'/><text x='48' y='65' font-size='60' text-anchor='middle' fill='white' font-family='system-ui' font-weight='bold'>K</text></svg>",
     tag: 'kendime-notification',
-    requireInteraction: true
+    requireInteraction: false,
+    vibrate: [200, 100, 200],
+    data: {
+      url: '/'
+    }
   };
+
+  if (event.data) {
+    try {
+      const data = event.data.json();
+      options.body = data.message || options.body;
+      options.title = data.title || 'Kendime';
+    } catch (e) {
+      options.body = event.data.text() || options.body;
+    }
+  }
   
   event.waitUntil(
     self.registration.showNotification('Kendime', options)
@@ -107,20 +117,27 @@ self.addEventListener('push', function(event) {
 // Notification click
 self.addEventListener('notificationclick', function(event) {
   event.notification.close();
+  
+  const url = event.notification.data?.url || '/';
+  
   event.waitUntil(
-    clients.openWindow('/')
+    clients.matchAll({ type: 'window' }).then(function(clientList) {
+      // Mevcut pencere varsa odaklan
+      for (let i = 0; i < clientList.length; i++) {
+        const client = clientList[i];
+        if (client.url === url && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // Yoksa yeni pencere aç
+      if (clients.openWindow) {
+        return clients.openWindow(url);
+      }
+    })
   );
 });
 
-function syncNotes() {
-  return new Promise((resolve) => {
-    console.log('Syncing notes...');
-    // Offline notları senkronize et
-    resolve();
-  });
-}
-
-// Message handler
+// Message event
 self.addEventListener('message', function(event) {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
