@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="tr">
 <head>
@@ -863,11 +862,11 @@
   <div class="header-left">
     <div class="logo">K</div>
   </div>
-  
+
   <div class="header-center">
     <a href="/" class="title">Kendime</a>
   </div>
-  
+
   <div class="header-right">
     <form class="search-container" onsubmit="event.preventDefault(); doSearch()">
       <span class="search-icon">🔍</span>
@@ -880,7 +879,7 @@
       </button>
       <input type="file" id="photoUpload" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
     </form>
-    
+
     <button class="theme-toggle" onclick="toggleTheme()" title="Tema değiştir"></button>
     <button class="action-btn" onclick="showSettings()" title="Ayarlar">⚙️</button>
   </div>
@@ -922,7 +921,7 @@
         </select>
       </div>
     </div>
-    
+
     <div class="form-group">
       <textarea id="contentInput" class="form-control" placeholder="Not içeriği... (Ses komutları: 'not ekle', 'temizle', 'ara')"></textarea>
     </div>
@@ -1031,12 +1030,11 @@ class KendimeApp {
     this.recognition = null;
     this.isListening = false;
     this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
+
     this.init();
   }
 
   init() {
-    this.setupServiceWorker();
     this.setupSpeechRecognition();
     this.setupEventListeners();
     this.setupPWA();
@@ -1050,7 +1048,7 @@ class KendimeApp {
       navigator.serviceWorker.register('/sw.js')
         .then(registration => {
           console.log('Service Worker registered:', registration);
-          
+
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
             newWorker.addEventListener('statechange', () => {
@@ -1178,7 +1176,7 @@ class KendimeApp {
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      
+
       if (this.isMobile) {
         this.showInstallPrompt(deferredPrompt);
       }
@@ -1379,7 +1377,7 @@ class KendimeApp {
   filterNotes() {
     return this.notes.filter(note => {
       if (note.archived) return false;
-      
+
       const searchText = `${note.title} ${note.content} ${note.tags} ${note.category}`.toLowerCase();
       return !this.query || searchText.includes(this.query);
     }).sort((a, b) => {
@@ -1634,10 +1632,10 @@ class KendimeApp {
   toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    
+
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
-    
+
     this.showToast(newTheme === 'dark' ? 'Koyu tema! 🌙' : 'Açık tema! ☀️', 'success');
   }
 
@@ -1826,11 +1824,11 @@ class KendimeApp {
         </div>
 
         <h4 class="note-title">${this.escapeHtml(note.title)}</h4>
-        
+
         ${note.image ? `
           <img src="${note.image}" style="max-width: 100%; height: auto; border-radius: 8px; margin: 12px 0;" alt="Yüklenen resim">
         ` : ''}
-        
+
         <div class="note-content">${this.escapeHtml(note.content.slice(0, 200))}${note.content.length > 200 ? '...' : ''}</div>
 
         ${note.tags ? `
