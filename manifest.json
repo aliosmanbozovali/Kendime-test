@@ -2,24 +2,25 @@
 {
   "name": "Kendime - Kişisel Not Uygulaması",
   "short_name": "Kendime",
-  "description": "Ses komutları, yapay zeka destekli kategorizasyon ve modern arayüz ile kişisel not alma uygulaması",
+  "description": "Gelişmiş ses komutları, yapay zeka destekli kategorizasyon ve modern arayüz ile kişisel not alma uygulaması. Fotoğraf yükleme, tema değiştirme ve offline çalışma özellikli.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f7f7f7",
+  "background_color": "#f8f9fa",
   "theme_color": "#ff7a00",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "tr",
-  "categories": ["productivity", "utilities"],
+  "dir": "ltr",
+  "categories": ["productivity", "utilities", "lifestyle"],
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%23ff7a00'/><text x='96' y='130' font-size='120' text-anchor='middle' fill='white' font-family='system-ui' font-weight='bold'>K</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23ff8a1f'/><stop offset='100%' style='stop-color:%23ff7a00'/></linearGradient></defs><rect width='192' height='192' rx='40' fill='url(%23grad)'/><text x='96' y='130' font-size='120' text-anchor='middle' fill='white' font-family='system-ui' font-weight='bold'>K</text><circle cx='150' cy='50' r='8' fill='rgba(255,255,255,0.3)'/></svg>",
       "sizes": "192x192",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%23ff7a00'/><text x='256' y='350' font-size='320' text-anchor='middle' fill='white' font-family='system-ui' font-weight='bold'>K</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23ff8a1f'/><stop offset='100%' style='stop-color:%23ff7a00'/></linearGradient></defs><rect width='512' height='512' rx='100' fill='url(%23grad)'/><text x='256' y='350' font-size='320' text-anchor='middle' fill='white' font-family='system-ui' font-weight='bold'>K</text><circle cx='400' cy='120' r='20' fill='rgba(255,255,255,0.3)'/></svg>",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"
@@ -27,10 +28,10 @@
   ],
   "shortcuts": [
     {
-      "name": "Yeni Not",
+      "name": "Hızlı Not Ekle",
       "short_name": "Yeni Not",
-      "description": "Hızlı not ekleme",
-      "url": "/?action=new",
+      "description": "Anında yeni bir not oluştur",
+      "url": "/?action=quick-note",
       "icons": [
         {
           "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ff7a00'><path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z'/></svg>",
@@ -39,16 +40,94 @@
       ]
     },
     {
-      "name": "Sesli Not",
-      "short_name": "Sesli Not",
-      "description": "Ses ile not kaydetme",
-      "url": "/?action=voice",
+      "name": "Sesli Not Al",
+      "short_name": "Ses Komut",
+      "description": "Ses ile hızla not kaydet",
+      "url": "/?action=voice-note",
       "icons": [
         {
           "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ff7a00'><path d='M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z'/><path d='M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z'/></svg>",
           "sizes": "96x96"
         }
       ]
+    },
+    {
+      "name": "Fotoğraf Ekle",
+      "short_name": "Foto",
+      "description": "Fotoğraf ile not oluştur",
+      "url": "/?action=photo-note",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ff7a00'><path d='M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z'/></svg>",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Arama Yap",
+      "short_name": "Ara",
+      "description": "Notlarında arama yap",
+      "url": "/?action=search",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ff7a00'><path d='M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/></svg>",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+notes",
+      "url": "/?handler=%s"
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "handle_links": "preferred",
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "file_handlers": [
+    {
+      "action": "/",
+      "accept": {
+        "application/json": [".json"],
+        "text/plain": [".txt", ".md"]
+      }
+    }
+  ],
+  "permissions": [
+    "microphone",
+    "camera",
+    "storage-access"
+  ],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1280 720'><rect width='1280' height='720' fill='%23f8f9fa'/><rect x='40' y='40' width='1200' height='640' rx='20' fill='white' stroke='%23dee2e6'/><text x='640' y='100' text-anchor='middle' fill='%23ff7a00' font-size='32' font-weight='bold'>Kendime - Kişisel Not Uygulaması</text><text x='640' y='160' text-anchor='middle' fill='%23666' font-size='18'>Modern, kullanıcı dostu arayüz ile notlarınızı organize edin</text></svg>",
+      "sizes": "1280x720",
+      "type": "image/svg+xml",
+      "form_factor": "wide",
+      "label": "Ana ekran görünümü"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 1136'><rect width='640' height='1136' fill='%23f8f9fa'/><rect x='20' y='20' width='600' height='1096' rx='20' fill='white' stroke='%23dee2e6'/><text x='320' y='80' text-anchor='middle' fill='%23ff7a00' font-size='24' font-weight='bold'>Mobil Görünüm</text><text x='320' y='120' text-anchor='middle' fill='%23666' font-size='14'>Touch dostu kontroller ve swipe hareketleri</text></svg>",
+      "sizes": "640x1136",
+      "type": "image/svg+xml",
+      "form_factor": "narrow",
+      "label": "Mobil görünüm"
     }
   ]
 }

@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="tr">
 <head>
@@ -26,132 +27,835 @@
 
 <title>Kendime — Kişisel Not Uygulaması</title>
 <style>
-  :root{--accent:#ff7a00;--bg:#f7f7f7;--fg:#111;--card:#fff;--muted:#666;--border:#e9e9e9;--success:#10b981;--warning:#f59e0b;--danger:#ef4444}
-  *{box-sizing:border-box} body{margin:0;font:16px/1.4 system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--fg);transition:all 0.3s ease}
-  header{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--border);padding:15px 20px;display:flex;align-items:center;z-index:100;backdrop-filter:blur(10px)}
-  .header-left{width:auto;display:flex;justify-content:flex-start}
-  .header-center{flex:1;display:flex;justify-content:center;text-align:center}
-  .header-right{width:auto;display:flex;justify-content:flex-end;gap:15px;align-items:center}
-  .logo{width:36px;height:36px;border-radius:10px;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:700}
-  .title{font-weight:700;color:var(--accent)}
-  .search{flex:1;max-width:600px;margin:0 auto}
-  .search-container{position:relative;display:flex;align-items:center;background:var(--card);border:1px solid #ddd;border-radius:24px;padding:8px 16px;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.3s ease}
-  .search-container:hover{box-shadow:0 4px 12px rgba(0,0,0,0.15)}
-  .search-container:focus-within{border-color:var(--accent);box-shadow:0 4px 12px rgba(255,122,0,0.2)}
-  .search-icon{color:var(--muted);margin-right:12px;font-size:16px}
-  .search input{flex:1;border:none;outline:none;background:transparent;font-size:16px;color:var(--fg)}
-  .search input::placeholder{color:var(--muted)}
-  .search-buttons{display:flex;align-items:center;gap:8px;margin-left:12px}
-  .search-action-btn{background:none;border:none;cursor:pointer;padding:8px;border-radius:50%;transition:all 0.2s;color:var(--muted);font-size:16px;width:36px;height:36px;display:flex;align-items:center;justify-content:center}
-  .search-action-btn:hover{background:rgba(0,0,0,0.08);color:var(--accent)}
-  .search-action-btn.listening{background:var(--danger);color:white;animation:pulse 1s infinite}
-  @keyframes pulse{0%,100%{transform:translateY(-50%) scale(1)}50%{transform:translateY(-50%) scale(1.1)}}
-  .wrap{max-width:1200px;margin:0 auto;padding:14px}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px;transition:all 0.2s}
-  .card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}
-  .grid{display:grid;gap:12px}
-  @media(min-width:720px){.grid{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}}
-  input,textarea,button,select{font:inherit}
-  input,textarea,select{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;transition:all 0.2s}
-  input:focus,textarea:focus,select:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(255,122,0,0.1)}
-  button{padding:10px 12px;border:0;border-radius:10px;background:var(--fg);color:var(--bg);cursor:pointer;transition:all 0.2s}
-  button:hover{transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,0.2)}
-  .btn-primary{background:var(--accent);color:#fff}
-  .btn-success{background:var(--success);color:#fff}
-  .btn-warning{background:var(--warning);color:#fff}
-  .btn-danger{background:var(--danger);color:#fff}
-  .light{background:#eee;color:#111}
-  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .pill{padding:6px 10px;border-radius:999px;background:#eee;color:#111;font-size:12px;cursor:pointer;transition:all 0.2s}
-  .pill:hover{background:var(--accent);color:#fff}
-  .muted{color:var(--muted)}
-  .note-card{position:relative;overflow:hidden}
-  .note-card.pinned{border-left:4px solid var(--accent)}
-  .note-card.archived{opacity:0.6}
-  .color-picker{display:flex;gap:5px;margin:8px 0}
-  .color-dot{width:20px;height:20px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 0.2s}
-  .color-dot:hover,.color-dot.active{border-color:var(--fg);transform:scale(1.2)}
-  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-bottom:12px}
-  .stat-item{text-align:center;padding:10px;background:var(--card);border-radius:10px;border:1px solid var(--border)}
-  .stat-number{font-size:24px;font-weight:700;color:var(--accent)}
-  .sort-controls{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
-  .filter-tabs{display:flex;gap:4px;margin-bottom:12px;overflow-x:auto}
-  .filter-tab{padding:8px 16px;border:1px solid var(--border);border-radius:20px;background:var(--card);cursor:pointer;transition:all 0.2s;white-space:nowrap}
-  .filter-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-  .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:none;z-index:1000;align-items:center;justify-content:center}
-  .modal.show{display:flex}
-  .modal-content{background:var(--card);border-radius:14px;padding:20px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto}
-  .floating-btn{position:fixed;bottom:20px;right:20px;width:60px;height:60px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.2);transition:all 0.3s;z-index:99}
-  .floating-btn:hover{transform:scale(1.1)}
-  .speech-status{position:fixed;top:80px;right:20px;padding:10px 15px;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.1);display:none;z-index:99}
-  .toast{position:fixed;top:20px;right:20px;padding:12px 16px;border-radius:10px;color:#fff;font-weight:500;z-index:1001;transform:translateX(400px);transition:all 0.3s}
-  .toast.show{transform:translateX(0)}
-  .toast.success{background:var(--success)}
-  .toast.warning{background:var(--warning)}
-  .toast.danger{background:var(--danger)}
-  .note-content{white-space:pre-wrap;word-break:break-word}
-  .edit-mode{border:2px solid var(--accent)}
-  .keyboard-shortcuts{position:fixed;bottom:10px;left:10px;font-size:12px;color:var(--muted);background:var(--card);padding:8px;border-radius:8px;border:1px solid var(--border);opacity:0.7}
-
-  /* Menu styles */
-  .menu-container{position:relative}
-  .menu-btn{background:none;border:none;font-size:20px;cursor:pointer;padding:8px;border-radius:50%;transition:all 0.2s;color:var(--muted);width:40px;height:40px;display:flex;align-items:center;justify-content:center}
-  .menu-btn:hover{background:rgba(0,0,0,0.08);color:var(--accent)}
-  .menu-dropdown{position:absolute;top:100%;right:0;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.1);min-width:200px;z-index:200;display:none}
-  .menu-dropdown.show{display:block}
-  .menu-item{padding:12px 16px;cursor:pointer;transition:all 0.2s;border-bottom:1px solid var(--border)}
-  .menu-item:last-child{border-bottom:none}
-  .menu-item:hover{background:var(--bg);color:var(--accent)}
-
-  /* Settings modal styles */
-  .setting-section{margin-bottom:20px;padding-bottom:15px;border-bottom:1px solid var(--border)}
-  .setting-section:last-child{border-bottom:none}
-  .setting-section h4{margin:0 0 10px 0;color:var(--accent)}
-  .setting-item{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-  .setting-item label{font-weight:500}
-  .setting-item input[type="checkbox"]{width:auto}
-
-  /* Help modal styles */
-  .help-section{margin-bottom:15px}
-  .help-section h4{color:var(--accent);margin:0 0 8px 0}
-  .shortcut-list div,.voice-commands div,.mobile-tips div{padding:4px 0;font-size:14px}
-  kbd{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:2px 6px;font-size:12px;font-family:monospace}
-
-  /* Mobile optimizations */
-  @media (max-width: 768px) {
-    .wrap{padding:8px}
-    .card{padding:8px}
-    .row{gap:4px}
-    header{padding:10px;gap:10px}
-    .header-center{flex:1;text-align:center}
-    .search{width:100%}
-    .search-container{padding:10px 16px}
-    .search input{font-size:16px}
-    .search-action-btn{width:40px;height:40px;font-size:18px}
-    .floating-btn{bottom:15px;right:15px;width:56px;height:56px;font-size:20px}
-    .modal-content{padding:15px;width:95%}
-    .filter-tabs{margin-bottom:8px}
-    .filter-tab{padding:6px 12px;font-size:14px}
-    .sort-controls{gap:4px;margin-bottom:8px}
-    .keyboard-shortcuts{display:none}
-    .toast{right:10px;top:10px;left:10px;right:10px;transform:translateY(-100px)}
-    .toast.show{transform:translateY(0)}
-    button{min-height:44px;padding:12px}
-    input,textarea,select{min-height:44px;font-size:16px}
-    .note-card{margin-bottom:8px}
-    .stats{grid-template-columns:repeat(2,1fr)}
+  :root{
+    --accent:#ff7a00;
+    --accent-light:#ff8a1f;
+    --accent-dark:#e66900;
+    --bg:#f8f9fa;
+    --fg:#212529;
+    --card:#ffffff;
+    --muted:#6c757d;
+    --border:#dee2e6;
+    --success:#28a745;
+    --warning:#ffc107;
+    --danger:#dc3545;
+    --info:#17a2b8;
+    --shadow:0 0.125rem 0.25rem rgba(0,0,0,0.075);
+    --shadow-lg:0 1rem 3rem rgba(0,0,0,0.175);
+    --gradient:linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
   }
 
-  /* Touch targets */
-  .color-dot{width:32px;height:32px;margin:2px}
-  .pill{min-height:32px;padding:8px 12px}
+  [data-theme="dark"] {
+    --bg:#1a1d29;
+    --fg:#e9ecef;
+    --card:#2d3748;
+    --muted:#a0aec0;
+    --border:#4a5568;
+    --shadow:0 0.125rem 0.25rem rgba(0,0,0,0.3);
+  }
 
-  /* Swipe gestures indicator */
-  .swipe-hint{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--card);padding:8px 16px;border-radius:20px;font-size:12px;color:var(--muted);border:1px solid var(--border);opacity:0.8;z-index:99}
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-  /* Haptic feedback simulation */
-  .haptic-feedback{animation:haptic 0.1s ease}
-  @keyframes haptic{0%{transform:scale(1)}50%{transform:scale(0.98)}100%{transform:scale(1)}}
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.6;
+    font-size: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-x: hidden;
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    z-index: 1000;
+    transition: all 0.3s ease;
+  }
+
+  [data-theme="dark"] header {
+    background: rgba(45, 55, 72, 0.95);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    min-width: 60px;
+  }
+
+  .header-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 60px;
+    justify-content: flex-end;
+  }
+
+  .logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--gradient);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease;
+  }
+
+  .logo:hover {
+    transform: scale(1.05);
+  }
+
+  .title {
+    font-weight: 700;
+    font-size: 24px;
+    color: var(--accent);
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .title:hover {
+    color: var(--accent-light);
+  }
+
+  .search-container {
+    max-width: 500px;
+    width: 100%;
+    position: relative;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 25px;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--shadow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .search-container:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(255, 122, 0, 0.1);
+    transform: translateY(-1px);
+  }
+
+  .search-icon {
+    color: var(--muted);
+    font-size: 16px;
+  }
+
+  .search input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 16px;
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  .search input::placeholder {
+    color: var(--muted);
+  }
+
+  .action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    color: var(--muted);
+    font-size: 16px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .action-btn:hover {
+    background: rgba(255, 122, 0, 0.1);
+    color: var(--accent);
+    transform: scale(1.1);
+  }
+
+  .action-btn.listening {
+    background: var(--danger);
+    color: white;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .quick-actions {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+
+  .quick-actions .button-group {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    min-height: 44px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn:hover::before {
+    left: 100%;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+
+  .btn:active {
+    transform: translateY(0);
+  }
+
+  .btn-primary {
+    background: var(--gradient);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 122, 0, 0.3);
+  }
+
+  .btn-secondary {
+    background: var(--card);
+    color: var(--fg);
+    border: 2px solid var(--border);
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, var(--success), #34ce57);
+    color: white;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+  }
+
+  .btn-danger {
+    background: linear-gradient(135deg, var(--danger), #e55370);
+    color: white;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+  }
+
+  .note-form {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+  }
+
+  .note-form:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 1.5rem 4rem rgba(0,0,0,0.1);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .form-group {
+    position: relative;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    background: var(--card);
+    color: var(--fg);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .form-control:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(255, 122, 0, 0.1);
+    transform: translateY(-1px);
+  }
+
+  .form-control::placeholder {
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+  }
+
+  .color-picker {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0;
+    padding: 8px 0;
+  }
+
+  .color-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .color-dot:hover {
+    transform: scale(1.2);
+    border-color: var(--fg);
+  }
+
+  .color-dot.active {
+    border-color: var(--accent);
+    transform: scale(1.3);
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+  }
+
+  .note-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid var(--border);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .note-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+
+  .note-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  }
+
+  .note-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .note-card.pinned {
+    border-left: 4px solid var(--accent);
+  }
+
+  .note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+
+  .note-title {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--fg);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .note-content {
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 16px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .note-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .note-actions {
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .note-card:hover .note-actions {
+    opacity: 1;
+  }
+
+  .note-action {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 14px;
+  }
+
+  .note-action:hover {
+    background: var(--accent);
+    color: white;
+    transform: scale(1.1);
+  }
+
+  .tag {
+    display: inline-block;
+    background: rgba(255, 122, 0, 0.1);
+    color: var(--accent);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 4px 4px 4px 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .tag:hover {
+    background: var(--accent);
+    color: white;
+  }
+
+  .category-badge {
+    background: var(--gradient);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .floating-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--gradient);
+    color: white;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 8px 32px rgba(255, 122, 0, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 999;
+  }
+
+  .floating-btn:hover {
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 12px 40px rgba(255, 122, 0, 0.6);
+  }
+
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 20px;
+  }
+
+  .modal.show {
+    display: flex;
+  }
+
+  .modal-content {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 32px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .modal.show .modal-content {
+    transform: scale(1);
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .modal-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--fg);
+  }
+
+  .close-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: var(--bg);
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+
+  .close-btn:hover {
+    background: var(--danger);
+    color: white;
+  }
+
+  .toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    padding: 16px 24px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    z-index: 3000;
+    transform: translateX(400px);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-lg);
+    max-width: 400px;
+  }
+
+  .toast.show {
+    transform: translateX(0);
+  }
+
+  .toast.success {
+    background: linear-gradient(135deg, var(--success), #34ce57);
+  }
+
+  .toast.warning {
+    background: linear-gradient(135deg, var(--warning), #ffcd39);
+    color: #333;
+  }
+
+  .toast.danger {
+    background: linear-gradient(135deg, var(--danger), #e55370);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .stat-number {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .stat-label {
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .theme-toggle {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 25px;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 60px;
+    height: 32px;
+    position: relative;
+  }
+
+  .theme-toggle::before {
+    content: '🌞';
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: all 0.3s ease;
+    font-size: 16px;
+  }
+
+  [data-theme="dark"] .theme-toggle::before {
+    content: '🌙';
+    left: calc(100% - 24px);
+  }
+
+  .loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--border);
+    border-radius: 50%;
+    border-top-color: var(--accent);
+    animation: spin 1s ease-in-out infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .count-badge {
+    background: var(--accent);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  /* Mobile Optimizations */
+  @media (max-width: 768px) {
+    .container {
+      padding: 12px;
+    }
+
+    .header-center {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .search-container {
+      max-width: 280px;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .quick-actions .button-group {
+      flex-direction: column;
+    }
+
+    .notes-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .floating-btn {
+      bottom: 16px;
+      right: 16px;
+      width: 56px;
+      height: 56px;
+      font-size: 20px;
+    }
+
+    .modal-content {
+      padding: 24px;
+      margin: 12px;
+    }
+
+    .toast {
+      right: 12px;
+      left: 12px;
+      transform: translateY(-100px);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+    }
+  }
+
+  /* Touch Optimizations */
+  @media (hover: none) and (pointer: coarse) {
+    .btn {
+      min-height: 48px;
+    }
+
+    .form-control {
+      min-height: 48px;
+    }
+
+    .action-btn {
+      width: 44px;
+      height: 44px;
+    }
+
+    .note-action {
+      width: 44px;
+      height: 44px;
+    }
+  }
+
+  /* Dark theme enhancements */
+  [data-theme="dark"] .note-card {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  [data-theme="dark"] .btn-secondary {
+    background: var(--card);
+    border-color: var(--border);
+  }
+
+  /* High contrast mode */
+  @media (prefers-contrast: high) {
+    :root {
+      --border: #000;
+      --shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .btn {
+      border: 2px solid currentColor;
+    }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--muted);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+  }
 </style>
 </head>
 <body>
@@ -159,63 +863,109 @@
   <div class="header-left">
     <div class="logo">K</div>
   </div>
+  
   <div class="header-center">
-    <div class="title">Kendime</div>
+    <a href="/" class="title">Kendime</a>
   </div>
+  
   <div class="header-right">
-    <form class="search" onsubmit="event.preventDefault();doSearch()">
-      <div class="search-container">
-        <div class="search-icon">🔍</div>
-        <input id="q" placeholder="Notlarda ara..." oninput="doSearch()">
-        <div class="search-buttons">
-          <button type="button" class="search-action-btn" onclick="toggleVoiceSearch()" title="Sesli arama">🎤</button>
-          <button type="button" class="search-action-btn" onclick="openPhotoUpload()" title="Fotoğraf yükle">📷</button>
-          <input type="file" id="photoUpload" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
-        </div>
-      </div>
+    <form class="search-container" onsubmit="event.preventDefault(); doSearch()">
+      <span class="search-icon">🔍</span>
+      <input id="searchInput" type="text" placeholder="Notlarda ara..." oninput="doSearch()">
+      <button type="button" class="action-btn" onclick="toggleVoiceSearch()" title="Sesli arama">
+        🎤
+      </button>
+      <button type="button" class="action-btn" onclick="openPhotoUpload()" title="Fotoğraf yükle">
+        📷
+      </button>
+      <input type="file" id="photoUpload" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
     </form>
-    <div class="menu-container">
-      <button class="menu-btn" onclick="toggleMenu()" title="Menü">⋮</button>
-      <div id="menuDropdown" class="menu-dropdown">
-        <div class="menu-item" onclick="toggleTheme()">🌓 Tema değiştir</div>
-        <div class="menu-item" onclick="showStats()">📊 İstatistikler</div>
-        <div class="menu-item" onclick="showSettings()">⚙️ Ayarlar</div>
-        <div class="menu-item" onclick="exportNotes()">💾 Dışa aktar</div>
-        <div class="menu-item" onclick="document.getElementById('importFile').click()">📂 İçe aktar</div>
-        <div class="menu-item" onclick="showHelp()">❓ Yardım</div>
-      </div>
-    </div>
+    
+    <button class="theme-toggle" onclick="toggleTheme()" title="Tema değiştir"></button>
+    <button class="action-btn" onclick="showSettings()" title="Ayarlar">⚙️</button>
   </div>
 </header>
 
-<div class="wrap">
-  <!-- Hidden Filter and Sort Controls (accessible via menu) -->
-  <div id="filterControls" class="filter-controls" style="display:none">
-    <div class="filter-tabs">
-      <div class="filter-tab active" onclick="setFilter('all')">Tümü</div>
-      <div class="filter-tab" onclick="setFilter('pinned')">📌 Sabitlenmiş</div>
-      <div class="filter-tab" onclick="setFilter('archived')">📁 Arşiv</div>
-      <div class="filter-tab" onclick="setFilter('recent')">🕒 Son eklenenler</div>
-    </div>
-    <div class="sort-controls">
-      <label>Sıralama:</label>
-      <select id="sortBy" onchange="render()">
-        <option value="newest">En yeni</option>
-        <option value="oldest">En eski</option>
-        <option value="title">Başlık (A-Z)</option>
-        <option value="updated">Son güncellenen</option>
-      </select>
+<div class="container">
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <div class="button-group">
+      <button class="btn btn-primary" onclick="addNote()" title="Not ekle (Ctrl+Enter)">
+        📝 Not Ekle
+      </button>
+      <button class="btn btn-secondary" onclick="clearForm()" title="Temizle (Esc)">
+        🗑️ Temizle
+      </button>
+      <button class="btn btn-success" onclick="startVoiceNote()" title="Sesli not (Ctrl+Shift+N)">
+        🎤 Sesli Not
+      </button>
     </div>
   </div>
 
-  <input type="file" id="importFile" accept=".json" onchange="importNotes()" style="display:none">
+  <!-- Note Form -->
+  <div class="note-form">
+    <div class="form-row">
+      <div class="form-group">
+        <input id="titleInput" class="form-control" type="text" placeholder="Başlık (Ctrl+N ile hızlı ekleme)">
+      </div>
+      <div class="form-group">
+        <input id="tagsInput" class="form-control" type="text" placeholder="Etiketler (virgülle ayır)">
+      </div>
+      <div class="form-group">
+        <select id="categorySelect" class="form-control">
+          <option value="">Kategori seçin</option>
+          <option value="Kişisel">📝 Kişisel</option>
+          <option value="İş">💼 İş</option>
+          <option value="Fikir">💡 Fikir</option>
+          <option value="Görev">✅ Görev</option>
+          <option value="Önemli">⭐ Önemli</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <textarea id="contentInput" class="form-control" placeholder="Not içeriği... (Ses komutları: 'not ekle', 'temizle', 'ara')"></textarea>
+    </div>
 
-  <!-- Add Note Form -->
-  <div class="card" style="margin-bottom:12px">
-    <div class="row">
-      <input id="title" placeholder="Başlık (Ctrl+N ile hızlı ekleme)">
-      <input id="tags" placeholder="Etiketler (virgülle ayır)">
-      <select id="category">
+    <div class="color-picker">
+      <div class="color-dot" style="background:#ffffff" data-color="#ffffff" onclick="selectColor('#ffffff')"></div>
+      <div class="color-dot" style="background:#fff3cd" data-color="#fff3cd" onclick="selectColor('#fff3cd')"></div>
+      <div class="color-dot" style="background:#f8d7da" data-color="#f8d7da" onclick="selectColor('#f8d7da')"></div>
+      <div class="color-dot" style="background:#d1ecf1" data-color="#d1ecf1" onclick="selectColor('#d1ecf1')"></div>
+      <div class="color-dot" style="background:#d4edda" data-color="#d4edda" onclick="selectColor('#d4edda')"></div>
+      <div class="color-dot" style="background:#e2e3f1" data-color="#e2e3f1" onclick="selectColor('#e2e3f1')"></div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
+      <span id="noteCount" class="count-badge">0 not</span>
+    </div>
+  </div>
+
+  <!-- Notes Grid -->
+  <div id="notesContainer" class="notes-grid"></div>
+</div>
+
+<!-- Floating Action Button -->
+<button class="floating-btn" onclick="quickAdd()" title="Hızlı not (Ctrl+N)">+</button>
+
+<!-- Modals -->
+<div id="editModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">✏️ Notu Düzenle</h3>
+      <button class="close-btn" onclick="closeModal('editModal')">✕</button>
+    </div>
+    <div class="form-group">
+      <input id="editTitle" class="form-control" type="text" placeholder="Başlık">
+    </div>
+    <div class="form-group">
+      <textarea id="editContent" class="form-control" placeholder="İçerik" rows="6"></textarea>
+    </div>
+    <div class="form-group">
+      <input id="editTags" class="form-control" type="text" placeholder="Etiketler">
+    </div>
+    <div class="form-group">
+      <select id="editCategory" class="form-control">
         <option value="">Kategori seçin</option>
         <option value="Kişisel">📝 Kişisel</option>
         <option value="İş">💼 İş</option>
@@ -224,246 +974,250 @@
         <option value="Önemli">⭐ Önemli</option>
       </select>
     </div>
-    <textarea id="content" rows="4" placeholder="Not yaz… (Ses komutları: 'not ekle', 'temizle', 'ara')"></textarea>
-
-    <!-- Color Picker -->
-    <div class="color-picker">
-      <div class="color-dot" style="background:#fff" data-color="#fff" onclick="selectColor('#fff')"></div>
-      <div class="color-dot" style="background:#fef3c7" data-color="#fef3c7" onclick="selectColor('#fef3c7')"></div>
-      <div class="color-dot" style="background:#fed7d7" data-color="#fed7d7" onclick="selectColor('#fed7d7')"></div>
-      <div class="color-dot" style="background:#c6f6d5" data-color="#c6f6d5" onclick="selectColor('#c6f6d5')"></div>
-      <div class="color-dot" style="background:#bee3f8" data-color="#bee3f8" onclick="selectColor('#bee3f8')"></div>
-      <div class="color-dot" style="background:#e9d8fd" data-color="#e9d8fd" onclick="selectColor('#e9d8fd')"></div>
-    </div>
-
-    <div class="row" style="justify-content:space-between;margin-top:8px">
-      <div class="row">
-        <button onclick="addNote()" class="btn-primary" title="Not ekle (Ctrl+Enter)">📝 Not ekle</button>
-        <button class="light" onclick="clearForm()" title="Temizle (Esc)">🗑️ Temizle</button>
-        <button class="voice-btn" onclick="startVoiceNote()" title="Sesli not (Ctrl+Shift+N)">🎤 Sesli Not</button>
-      </div>
-      <span id="count" class="muted"></span>
+    <div style="display: flex; gap: 12px; margin-top: 24px;">
+      <button class="btn btn-success" onclick="saveEdit()">💾 Kaydet</button>
+      <button class="btn btn-secondary" onclick="closeModal('editModal')">❌ İptal</button>
     </div>
   </div>
-
-  <!-- Notes List -->
-  <div id="list" class="grid"></div>
 </div>
 
-<!-- Floating Action Button -->
-<button class="floating-btn" onclick="quickAdd()" title="Hızlı not (Ctrl+N)">+</button>
-
-<!-- Speech Status -->
-<div id="speechStatus" class="speech-status">
-  🎤 Dinleniyor...
-</div>
-
-<!-- Statistics Modal -->
 <div id="statsModal" class="modal">
   <div class="modal-content">
-    <h3>📊 İstatistikler</h3>
-    <div id="statsContent"></div>
-    <button onclick="closeModal('statsModal')" class="light" style="margin-top:15px">Kapat</button>
-  </div>
-</div>
-
-<!-- Edit Modal -->
-<div id="editModal" class="modal">
-  <div class="modal-content">
-    <h3>✏️ Notu Düzenle</h3>
-    <input id="editTitle" placeholder="Başlık">
-    <textarea id="editContent" rows="6" placeholder="İçerik"></textarea>
-    <input id="editTags" placeholder="Etiketler">
-    <select id="editCategory">
-      <option value="">Kategori seçin</option>
-      <option value="Kişisel">📝 Kişisel</option>
-      <option value="İş">💼 İş</option>
-      <option value="Fikir">💡 Fikir</option>
-      <option value="Görev">✅ Görev</option>
-      <option value="Önemli">⭐ Önemli</option>
-    </select>
-    <div class="row" style="margin-top:15px">
-      <button onclick="saveEdit()" class="btn-success">💾 Kaydet</button>
-      <button onclick="closeModal('editModal')" class="light">❌ İptal</button>
+    <div class="modal-header">
+      <h3 class="modal-title">📊 İstatistikler</h3>
+      <button class="close-btn" onclick="closeModal('statsModal')">✕</button>
     </div>
+    <div id="statsContent"></div>
   </div>
 </div>
 
-<!-- Settings Modal -->
 <div id="settingsModal" class="modal">
   <div class="modal-content">
-    <h3>⚙️ Uygulama Ayarları</h3>
-
-    <div class="setting-section">
-      <h4>🎨 Görünüm</h4>
-      <div class="setting-item">
-        <label>Tema:</label>
-        <button onclick="toggleTheme()" class="light">🌓 Tema Değiştir</button>
-      </div>
-      <div class="setting-item">
-        <label>Not kartı boyutu:</label>
-        <select id="cardSize" onchange="changeCardSize()">
-          <option value="small">Küçük</option>
-          <option value="medium" selected>Orta</option>
-          <option value="large">Büyük</option>
-        </select>
-      </div>
+    <div class="modal-header">
+      <h3 class="modal-title">⚙️ Ayarlar</h3>
+      <button class="close-btn" onclick="closeModal('settingsModal')">✕</button>
     </div>
-
-    <div class="setting-section">
-      <h4>🔊 Ses Ayarları</h4>
-      <div class="setting-item">
-        <label>Ses komutları:</label>
-        <input type="checkbox" id="voiceEnabled" checked onchange="toggleVoiceCommands()">
+    <div id="settingsContent">
+      <div style="margin-bottom: 20px;">
+        <h4 style="margin-bottom: 12px;">🎨 Görünüm</h4>
+        <button class="btn btn-secondary" onclick="toggleTheme()">🌓 Tema Değiştir</button>
       </div>
-      <div class="setting-item">
-        <label>Bildirim sesleri:</label>
-        <input type="checkbox" id="soundEnabled" checked onchange="toggleSounds()">
+      <div style="margin-bottom: 20px;">
+        <h4 style="margin-bottom: 12px;">📊 Veri</h4>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button class="btn btn-success" onclick="exportNotes()">💾 Dışa Aktar</button>
+          <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📂 İçe Aktar</button>
+          <button class="btn btn-danger" onclick="clearAllData()">🗑️ Tümünü Sil</button>
+        </div>
       </div>
-    </div>
-
-    <div class="setting-section">
-      <h4>📱 Davranış</h4>
-      <div class="setting-item">
-        <label>Otomatik kaydetme:</label>
-        <input type="checkbox" id="autoSave" checked onchange="toggleAutoSave()">
+      <div>
+        <button class="btn btn-secondary" onclick="showStats()">📊 İstatistikleri Göster</button>
       </div>
-      <div class="setting-item">
-        <label>Filtreleri göster:</label>
-        <input type="checkbox" id="showFilters" onchange="toggleFilters()">
-      </div>
-      <div class="setting-item">
-        <label>Yapay zeka önerileri:</label>
-        <input type="checkbox" id="aiSuggestions" onchange="toggleAISuggestions()">
-      </div>
-    </div>
-
-    <div class="setting-section">
-      <h4>🗂️ Veri</h4>
-      <div class="setting-item">
-        <button onclick="clearAllData()" class="btn-danger">🗑️ Tüm Verileri Sil</button>
-      </div>
-      <div class="setting-item">
-        <button onclick="exportNotes()" class="light">💾 Notları Dışa Aktar</button>
-      </div>
-    </div>
-
-    <div class="row" style="margin-top:20px">
-      <button onclick="closeModal('settingsModal')" class="btn-primary">✅ Tamam</button>
     </div>
   </div>
 </div>
 
-<!-- Help Modal -->
-<div id="helpModal" class="modal">
-  <div class="modal-content">
-    <h3>❓ Yardım & Kısayollar</h3>
-
-    <div class="help-section">
-      <h4>⌨️ Klavye Kısayolları</h4>
-      <div class="shortcut-list">
-        <div><kbd>Ctrl + N</kbd> - Hızlı not ekleme</div>
-        <div><kbd>Ctrl + F</kbd> - Arama kutusuna odaklan</div>
-        <div><kbd>Ctrl + Enter</kbd> - Not ekle</div>
-        <div><kbd>Ctrl + Shift + V</kbd> - Sesli arama</div>
-        <div><kbd>Esc</kbd> - Formu temizle</div>
-      </div>
-    </div>
-
-    <div class="help-section">
-      <h4>🎤 Ses Komutları</h4>
-      <div class="voice-commands">
-        <div>"not ekle" - Notu kaydet</div>
-        <div>"temizle" - Formu temizle</div>
-        <div>"ara [kelime]" - Kelimeyi ara</div>
-        <div>"yeni not" - Hızlı not ekleme</div>
-      </div>
-    </div>
-
-    <div class="help-section">
-      <h4>📱 Mobil İpuçları</h4>
-      <div class="mobile-tips">
-        <div>• Notları sola kaydırarak silebilirsiniz</div>
-        <div>• + butonuna basarak hızlı not ekleyebilirsiniz</div>
-        <div>• Ses komutlarını mikrofondan kullanabilirsiniz</div>
-      </div>
-    </div>
-
-    <button onclick="closeModal('helpModal')" class="btn-primary" style="margin-top:15px">Kapat</button>
-  </div>
-</div>
-
-<!-- Mobile Swipe Hint -->
-<div id="swipeHint" class="swipe-hint" style="display:none">
-  👆 İpucu: Notları kaydırarak sil
-</div>
-
-<!-- Keyboard Shortcuts Info -->
-<div class="keyboard-shortcuts">
-  ⌨️ Kısayollar: Ctrl+N (Hızlı not) | Ctrl+F (Ara) | Ctrl+Shift+V (Sesli arama) | Esc (Temizle)
-</div>
+<input type="file" id="importFile" accept=".json" onchange="importNotes()" style="display:none">
 
 <script>
-const KEY = "kendime_notes_v2";
-let notes = JSON.parse(localStorage.getItem(KEY) || "[]");
-let query = "";
-let currentFilter = "all";
-let selectedColor = "#fff";
-let editingId = null;
-let recognition = null;
-let isListening = false;
-let touchStartX = 0;
-let touchStartY = 0;
-let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+// Modern JavaScript with ES6+ features
+class KendimeApp {
+  constructor() {
+    this.STORAGE_KEY = 'kendime_notes_v3';
+    this.notes = this.loadNotes();
+    this.query = '';
+    this.selectedColor = '#ffffff';
+    this.editingId = null;
+    this.recognition = null;
+    this.isListening = false;
+    this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    this.init();
+  }
 
-// Service Worker Registration
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js')
-      .then(function(registration) {
-        console.log('SW registered successfully:', registration);
+  init() {
+    this.setupServiceWorker();
+    this.setupSpeechRecognition();
+    this.setupEventListeners();
+    this.setupPWA();
+    this.render();
+    this.updateColorPicker();
+    this.showWelcomeMessage();
+  }
 
-        // Update found
-        registration.addEventListener('updatefound', () => {
-          const newWorker = registration.installing;
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              showToast('Yeni güncelleme mevcut! Sayfayı yenileyin.', 'warning');
-            }
+  setupServiceWorker() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+          console.log('Service Worker registered:', registration);
+          
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                this.showToast('Yeni güncelleme mevcut! Sayfayı yenileyin.', 'warning');
+              }
+            });
           });
-        });
-      })
-      .catch(function(registrationError) {
-        console.log('SW registration failed:', registrationError);
-      });
-  });
-}
+        })
+        .catch(error => console.log('Service Worker registration failed:', error));
+    }
+  }
 
-// PWA install prompt
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  showInstallBanner();
-});
+  setupSpeechRecognition() {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      this.recognition = new SpeechRecognition();
+      this.recognition.continuous = false;
+      this.recognition.interimResults = false;
+      this.recognition.lang = 'tr-TR';
 
-function showInstallBanner() {
-  if (isMobile && deferredPrompt) {
+      this.recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript.toLowerCase();
+        this.handleVoiceCommand(transcript);
+      };
+
+      this.recognition.onerror = (event) => {
+        this.showToast(`Ses tanıma hatası: ${event.error}`, 'danger');
+        this.stopListening();
+      };
+
+      this.recognition.onend = () => {
+        this.stopListening();
+      };
+    }
+  }
+
+  setupEventListeners() {
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        this.quickAdd();
+      }
+      if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault();
+        document.getElementById('searchInput').focus();
+      }
+      if (e.ctrlKey && e.shiftKey && e.key === 'V') {
+        e.preventDefault();
+        this.toggleVoiceSearch();
+      }
+      if (e.ctrlKey && e.shiftKey && e.key === 'N') {
+        e.preventDefault();
+        this.startVoiceNote();
+      }
+      if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        this.addNote();
+      }
+      if (e.key === 'Escape') {
+        this.clearForm();
+      }
+    });
+
+    // Close modals on outside click
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal')) {
+        e.target.classList.remove('show');
+      }
+    });
+
+    // Touch events for mobile
+    if (this.isMobile) {
+      this.setupTouchEvents();
+    }
+
+    // Auto-save on input
+    ['titleInput', 'contentInput', 'tagsInput'].forEach(id => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.addEventListener('input', this.debounce(() => {
+          this.autoSave();
+        }, 1000));
+      }
+    });
+  }
+
+  setupTouchEvents() {
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    document.addEventListener('touchstart', (e) => {
+      if (e.target.closest('.note-card')) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+      if (!e.target.closest('.note-card')) return;
+
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const deltaX = touchStartX - touchEndX;
+      const deltaY = Math.abs(touchStartY - touchEndY);
+
+      if (Math.abs(deltaX) > 100 && deltaY < 50) {
+        const noteCard = e.target.closest('.note-card');
+        const noteId = this.extractNoteId(noteCard);
+
+        if (deltaX > 0 && noteId) {
+          this.hapticFeedback();
+          if (confirm('Bu notu silmek istediğinizden emin misiniz?')) {
+            this.removeNote(noteId);
+          }
+        }
+      }
+    }, { passive: true });
+  }
+
+  setupPWA() {
+    let deferredPrompt;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      
+      if (this.isMobile) {
+        this.showInstallPrompt(deferredPrompt);
+      }
+    });
+
+    window.addEventListener('appinstalled', () => {
+      this.showToast('Uygulama başarıyla yüklendi! 📱', 'success');
+      deferredPrompt = null;
+    });
+  }
+
+  showInstallPrompt(deferredPrompt) {
     const installBanner = document.createElement('div');
     installBanner.innerHTML = `
-      <div style="position:fixed;bottom:80px;left:10px;right:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,0.1)">
-        <div class="row" style="justify-content:space-between;align-items:center">
+      <div style="position:fixed;bottom:80px;left:16px;right:16px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;z-index:999;box-shadow:var(--shadow-lg)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
-            <div style="font-weight:600">📱 Uygulamayı Yükle</div>
-            <div style="font-size:12px;color:var(--muted)">Ana ekranına ekle</div>
+            <div style="font-weight:600;margin-bottom:4px">📱 Uygulamayı Yükle</div>
+            <div style="font-size:14px;color:var(--muted)">Ana ekranına hızlı erişim için ekle</div>
           </div>
-          <div class="row" style="gap:8px">
-            <button onclick="installPWA()" class="btn-primary" style="padding:8px 12px;font-size:12px">Yükle</button>
-            <button onclick="this.parentElement.parentElement.parentElement.remove()" class="light" style="padding:8px 12px;font-size:12px">✕</button>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="this.parentElement.parentElement.parentElement.parentElement.querySelector('.install-btn').click()" style="padding:8px 16px;font-size:14px">Yükle</button>
+            <button class="btn btn-secondary" onclick="this.parentElement.parentElement.parentElement.parentElement.remove()" style="padding:8px 16px;font-size:14px">✕</button>
           </div>
         </div>
       </div>
     `;
+
+    const installBtn = installBanner.querySelector('.install-btn') || document.createElement('button');
+    installBtn.onclick = () => {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          this.showToast('Uygulama yükleniyor! 📱', 'success');
+        }
+      });
+      installBanner.remove();
+    };
+
     document.body.appendChild(installBanner);
 
     setTimeout(() => {
@@ -472,788 +1226,668 @@ function showInstallBanner() {
       }
     }, 10000);
   }
-}
 
-function installPWA() {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then((choiceResult) => {
-      if (choiceResult.outcome === 'accepted') {
-        showToast('Uygulama yükleniyor! 📱', 'success');
-      }
-      deferredPrompt = null;
-    });
-  }
-}
-
-// Initialize speech recognition
-if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recognition = new SpeechRecognition();
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.lang = 'tr-TR';
-
-  recognition.onresult = function(event) {
-    const transcript = event.results[0][0].transcript.toLowerCase();
-    handleVoiceCommand(transcript);
-  };
-
-  recognition.onerror = function(event) {
-    showToast('Ses tanıma hatası: ' + event.error, 'danger');
-    hideVoiceStatus();
-  };
-
-  recognition.onend = function() {
-    isListening = false;
-    hideVoiceStatus();
-    updateVoiceButton();
-  };
-}
-
-// Note: Debounced save for localStorage optimization.
-let saveTimeout;
-function save() {
-  clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(() => {
-    localStorage.setItem(KEY, JSON.stringify(notes));
-  }, 300); // 300ms bekle
-}
-
-// Immediate save for specific actions if needed.
-function saveNow() {
-  clearTimeout(saveTimeout);
-  localStorage.setItem(KEY, JSON.stringify(notes));
-}
-
-function uid() { 
-  return Date.now().toString(36) + Math.random().toString(36).slice(2); 
-}
-
-function formatDate(timestamp) {
-  return new Date(timestamp).toLocaleDateString('tr-TR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-}
-
-function escape(s) {
-  return s.replace(/[&<>"']/g, m => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  }[m]));
-}
-
-// Note management
-function addNote() {
-  const t = title.value.trim();
-  const c = content.value.trim();
-  const g = tags.value.trim();
-  const cat = category.value;
-
-  if (!t && !c) {
-    showToast("Boş not eklenemez", "warning");
-    return;
-  }
-
-  // Add haptic feedback for mobile
-  addHapticFeedback(event?.target);
-
-  const note = {
-    id: uid(),
-    title: t,
-    content: c,
-    tags: g,
-    category: cat,
-    pinned: false,
-    archived: false,
-    color: selectedColor,
-    ts: Date.now(),
-    updated: Date.now()
-  };
-
-  notes.unshift(note);
-  clearForm();
-  save();
-  showToast("Not eklendi! 📝", "success");
-}
-
-function editNote(id) {
-  const note = notes.find(n => n.id === id);
-  if (!note) return;
-
-  editingId = id;
-  document.getElementById('editTitle').value = note.title || '';
-  document.getElementById('editContent').value = note.content || '';
-  document.getElementById('editTags').value = note.tags || '';
-  document.getElementById('editCategory').value = note.category || '';
-
-  showModal('editModal');
-}
-
-function saveEdit() {
-  if (!editingId) return;
-
-  const note = notes.find(n => n.id === editingId);
-  if (!note) return;
-
-  note.title = document.getElementById('editTitle').value.trim();
-  note.content = document.getElementById('editContent').value.trim();
-  note.tags = document.getElementById('editTags').value.trim();
-  note.category = document.getElementById('editCategory').value;
-  note.updated = Date.now();
-
-  save();
-  closeModal('editModal');
-  showToast("Not güncellendi! ✅", "success");
-  editingId = null;
-}
-
-function removeNote(id) {
-  if (confirm('Bu notu silmek istediğinizden emin misiniz?')) {
-    notes = notes.filter(n => n.id !== id);
-    save();
-    showToast("Not silindi! 🗑️", "success");
-  }
-}
-
-function togglePin(id) {
-  const note = notes.find(n => n.id === id);
-  if (note) {
-    note.pinned = !note.pinned;
-    note.updated = Date.now();
-    save();
-    showToast(note.pinned ? "Not sabitlendi! 📌" : "Not sabitleme kaldırıldı!", "success");
-  }
-}
-
-function toggleArchive(id) {
-  const note = notes.find(n => n.id === id);
-  if (note) {
-    note.archived = !note.archived;
-    note.updated = Date.now();
-    save();
-    showToast(note.archived ? "Not arşivlendi! 📁" : "Not arşivden çıkarıldı!", "success");
-  }
-}
-
-function duplicateNote(id) {
-  const note = notes.find(n => n.id === id);
-  if (note) {
-    const newNote = {
-      ...note,
-      id: uid(),
-      title: (note.title || '') + ' (Kopya)',
-      ts: Date.now(),
-      updated: Date.now()
-    };
-    notes.unshift(newNote);
-    save();
-    showToast("Not kopyalandı! 📋", "success");
-  }
-}
-
-function clearForm() {
-  title.value = "";
-  content.value = "";
-  tags.value = "";
-  category.value = "";
-  selectedColor = "#fff";
-  updateColorPicker();
-}
-
-function selectColor(color) {
-  selectedColor = color;
-  updateColorPicker();
-}
-
-function updateColorPicker() {
-  document.querySelectorAll('.color-dot').forEach(dot => {
-    dot.classList.toggle('active', dot.dataset.color === selectedColor);
-  });
-}
-
-// Search and filter
-function doSearch() {
-  query = q.value.toLowerCase();
-  render();
-}
-
-function setFilter(filter) {
-  currentFilter = filter;
-  document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
-  event.target.classList.add('active');
-  render();
-}
-
-// Voice commands
-function handleVoiceCommand(transcript) {
-  hideVoiceStatus();
-
-  if (transcript.includes('not ekle') || transcript.includes('kaydet')) {
-    addNote();
-  } else if (transcript.includes('temizle') || transcript.includes('sil')) {
-    clearForm();
-    showToast("Form temizlendi! 🗑️", "success");
-  } else if (transcript.includes('ara') || transcript.includes('bul')) {
-    const searchTerm = transcript.replace(/ara|bul/g, '').trim();
-    if (searchTerm) {
-      document.getElementById('q').value = searchTerm;
-      doSearch();
-      showToast(`"${searchTerm}" aranıyor...`, "success");
+  // Data Management
+  loadNotes() {
+    try {
+      return JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '[]');
+    } catch (error) {
+      console.error('Error loading notes:', error);
+      return [];
     }
-  } else if (transcript.includes('yeni not')) {
-    quickAdd();
-  } else if (transcript.includes('tümü') || transcript.includes('hepsi')) {
-    setFilter('all');
-  } else if (transcript.includes('sabitle') || transcript.includes('pin')) {
-    showToast("Hangi notu sabitlemek istediğinizi belirtin", "warning");
-  } else {
-    // If no command recognized, use as note content
-    content.value = transcript;
-    showToast("Ses metne dönüştürüldü! ✍️", "success");
-  }
-}
-
-function startVoiceNote() {
-  if (!recognition) {
-    showToast("Ses tanıma bu tarayıcıda desteklenmiyor", "danger");
-    return;
   }
 
-  if (isListening) {
-    recognition.stop();
-    return;
+  saveNotes() {
+    try {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.notes));
+    } catch (error) {
+      console.error('Error saving notes:', error);
+      this.showToast('Kaydetme hatası!', 'danger');
+    }
   }
 
-  isListening = true;
-  showVoiceStatus();
-  updateVoiceButton();
-  recognition.start();
-}
-
-function toggleVoiceSearch() {
-  if (!recognition) {
-    showToast("Ses tanıma bu tarayıcıda desteklenmiyor", "danger");
-    return;
+  generateId() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2);
   }
 
-  if (isListening) {
-    recognition.stop();
-    return;
-  }
+  // Note Operations
+  addNote() {
+    const title = document.getElementById('titleInput').value.trim();
+    const content = document.getElementById('contentInput').value.trim();
+    const tags = document.getElementById('tagsInput').value.trim();
+    const category = document.getElementById('categorySelect').value;
 
-  isListening = true;
-  showVoiceStatus();
-  updateVoiceButton();
+    if (!title && !content) {
+      this.showToast('Boş not eklenemez!', 'warning');
+      return;
+    }
 
-  recognition.onresult = function(event) {
-    const transcript = event.results[0][0].transcript;
-    document.getElementById('q').value = transcript;
-    doSearch();
-    showToast(`"${transcript}" aranıyor...`, "success");
-  };
-
-  recognition.start();
-}
-
-function openPhotoUpload() {
-  document.getElementById('photoUpload').click();
-}
-
-function handlePhotoUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  if (!file.type.startsWith('image/')) {
-    showToast("Lütfen geçerli bir resim dosyası seçin", "danger");
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const imageData = e.target.result;
-
-    // Create a note with the image
     const note = {
-      id: uid(),
-      title: `Fotoğraf - ${file.name}`,
-      content: `Fotoğraf yüklendi: ${file.name}\nBoyut: ${(file.size / 1024).toFixed(1)} KB`,
-      tags: "fotoğraf,resim",
-      category: "Medya",
+      id: this.generateId(),
+      title: title || 'Başlıksız Not',
+      content,
+      tags,
+      category,
+      color: this.selectedColor,
       pinned: false,
       archived: false,
-      color: selectedColor,
-      image: imageData,
-      ts: Date.now(),
+      created: Date.now(),
       updated: Date.now()
     };
 
-    notes.unshift(note);
-    save();
-    showToast("Fotoğraf eklendi! 📷", "success");
+    this.notes.unshift(note);
+    this.saveNotes();
+    this.clearForm();
+    this.render();
+    this.showToast('Not başarıyla eklendi! 📝', 'success');
+    this.hapticFeedback();
+  }
 
-    // Clear the file input
-    event.target.value = '';
+  editNote(id) {
+    const note = this.notes.find(n => n.id === id);
+    if (!note) return;
 
-    // Refresh the view
-    render();
-  };
+    this.editingId = id;
+    document.getElementById('editTitle').value = note.title || '';
+    document.getElementById('editContent').value = note.content || '';
+    document.getElementById('editTags').value = note.tags || '';
+    document.getElementById('editCategory').value = note.category || '';
 
-  reader.readAsDataURL(file);
-}
+    this.showModal('editModal');
+  }
 
-function updateVoiceButton() {
-  document.querySelectorAll('.search-action-btn').forEach(btn => {
-    if (btn.textContent.includes('🎤')) {
-      btn.classList.toggle('listening', isListening);
+  saveEdit() {
+    if (!this.editingId) return;
+
+    const note = this.notes.find(n => n.id === this.editingId);
+    if (!note) return;
+
+    note.title = document.getElementById('editTitle').value.trim() || 'Başlıksız Not';
+    note.content = document.getElementById('editContent').value.trim();
+    note.tags = document.getElementById('editTags').value.trim();
+    note.category = document.getElementById('editCategory').value;
+    note.updated = Date.now();
+
+    this.saveNotes();
+    this.closeModal('editModal');
+    this.render();
+    this.showToast('Not güncellendi! ✅', 'success');
+    this.editingId = null;
+  }
+
+  removeNote(id) {
+    if (!confirm('Bu notu silmek istediğinizden emin misiniz?')) return;
+
+    this.notes = this.notes.filter(n => n.id !== id);
+    this.saveNotes();
+    this.render();
+    this.showToast('Not silindi! 🗑️', 'success');
+    this.hapticFeedback();
+  }
+
+  togglePin(id) {
+    const note = this.notes.find(n => n.id === id);
+    if (note) {
+      note.pinned = !note.pinned;
+      note.updated = Date.now();
+      this.saveNotes();
+      this.render();
+      this.showToast(note.pinned ? 'Not sabitlendi! 📌' : 'Sabitleme kaldırıldı!', 'success');
     }
-  });
-}
+  }
 
-function showVoiceStatus() {
-  document.getElementById('speechStatus').style.display = 'block';
-}
-
-function hideVoiceStatus() {
-  document.getElementById('speechStatus').style.display = 'none';
-}
-
-// UI functions
-function showToast(message, type = 'success') {
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  toast.textContent = message;
-  document.body.appendChild(toast);
-
-  setTimeout(() => toast.classList.add('show'), 100);
-  setTimeout(() => {
-    toast.classList.remove('show');
-    setTimeout(() => document.body.removeChild(toast), 300);
-  }, 3000);
-}
-
-function showModal(modalId) {
-  document.getElementById(modalId).classList.add('show');
-}
-
-function closeModal(modalId) {
-  document.getElementById(modalId).classList.remove('show');
-}
-
-function quickAdd() {
-  document.getElementById('title').focus();
-  showToast("Hızlı not ekleme! ⚡", "success");
-}
-
-// Statistics
-function showStats() {
-  const total = notes.length;
-  const pinned = notes.filter(n => n.pinned).length;
-  const archived = notes.filter(n => n.archived).length;
-  const categories = {};
-  const tagStats = {};
-
-  notes.forEach(note => {
-    if (note.category) {
-      categories[note.category] = (categories[note.category] || 0) + 1;
+  toggleArchive(id) {
+    const note = this.notes.find(n => n.id === id);
+    if (note) {
+      note.archived = !note.archived;
+      note.updated = Date.now();
+      this.saveNotes();
+      this.render();
+      this.showToast(note.archived ? 'Not arşivlendi! 📁' : 'Arşivden çıkarıldı!', 'success');
     }
-    if (note.tags) {
-      note.tags.split(',').forEach(tag => {
-        const cleanTag = tag.trim();
-        if (cleanTag) {
-          tagStats[cleanTag] = (tagStats[cleanTag] || 0) + 1;
+  }
+
+  duplicateNote(id) {
+    const note = this.notes.find(n => n.id === id);
+    if (note) {
+      const duplicate = {
+        ...note,
+        id: this.generateId(),
+        title: `${note.title} (Kopya)`,
+        created: Date.now(),
+        updated: Date.now()
+      };
+      this.notes.unshift(duplicate);
+      this.saveNotes();
+      this.render();
+      this.showToast('Not kopyalandı! 📋', 'success');
+    }
+  }
+
+  // Search and Filter
+  doSearch() {
+    this.query = document.getElementById('searchInput').value.toLowerCase();
+    this.render();
+  }
+
+  searchByTag(tag) {
+    document.getElementById('searchInput').value = tag;
+    this.doSearch();
+    this.showToast(`"${tag}" etiketi aranıyor...`, 'success');
+  }
+
+  filterNotes() {
+    return this.notes.filter(note => {
+      if (note.archived) return false;
+      
+      const searchText = `${note.title} ${note.content} ${note.tags} ${note.category}`.toLowerCase();
+      return !this.query || searchText.includes(this.query);
+    }).sort((a, b) => {
+      if (a.pinned !== b.pinned) return b.pinned - a.pinned;
+      return b.updated - a.updated;
+    });
+  }
+
+  // Voice Commands
+  handleVoiceCommand(transcript) {
+    if (transcript.includes('not ekle') || transcript.includes('kaydet')) {
+      this.addNote();
+    } else if (transcript.includes('temizle') || transcript.includes('sil')) {
+      this.clearForm();
+      this.showToast('Form temizlendi! 🗑️', 'success');
+    } else if (transcript.includes('ara') || transcript.includes('bul')) {
+      const searchTerm = transcript.replace(/ara|bul/g, '').trim();
+      if (searchTerm) {
+        document.getElementById('searchInput').value = searchTerm;
+        this.doSearch();
+        this.showToast(`"${searchTerm}" aranıyor...`, 'success');
+      }
+    } else if (transcript.includes('yeni not')) {
+      this.quickAdd();
+    } else {
+      document.getElementById('contentInput').value = transcript;
+      this.showToast('Ses metne dönüştürüldü! ✍️', 'success');
+    }
+  }
+
+  startVoiceNote() {
+    if (!this.recognition) {
+      this.showToast('Ses tanıma bu tarayıcıda desteklenmiyor!', 'danger');
+      return;
+    }
+
+    if (this.isListening) {
+      this.recognition.stop();
+      return;
+    }
+
+    this.isListening = true;
+    this.updateVoiceButton();
+    this.recognition.start();
+    this.showToast('Dinleniyor... 🎤', 'info');
+  }
+
+  toggleVoiceSearch() {
+    if (!this.recognition) {
+      this.showToast('Ses tanıma bu tarayıcıda desteklenmiyor!', 'danger');
+      return;
+    }
+
+    if (this.isListening) {
+      this.recognition.stop();
+      return;
+    }
+
+    this.isListening = true;
+    this.updateVoiceButton();
+
+    this.recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      document.getElementById('searchInput').value = transcript;
+      this.doSearch();
+      this.showToast(`"${transcript}" aranıyor...`, 'success');
+    };
+
+    this.recognition.start();
+    this.showToast('Sesli arama başlatıldı... 🎤', 'info');
+  }
+
+  stopListening() {
+    this.isListening = false;
+    this.updateVoiceButton();
+  }
+
+  updateVoiceButton() {
+    const voiceBtn = document.querySelector('[onclick*="toggleVoiceSearch"]');
+    if (voiceBtn) {
+      voiceBtn.classList.toggle('listening', this.isListening);
+    }
+  }
+
+  // UI Management
+  clearForm() {
+    document.getElementById('titleInput').value = '';
+    document.getElementById('contentInput').value = '';
+    document.getElementById('tagsInput').value = '';
+    document.getElementById('categorySelect').value = '';
+    this.selectedColor = '#ffffff';
+    this.updateColorPicker();
+  }
+
+  selectColor(color) {
+    this.selectedColor = color;
+    this.updateColorPicker();
+  }
+
+  updateColorPicker() {
+    document.querySelectorAll('.color-dot').forEach(dot => {
+      dot.classList.toggle('active', dot.dataset.color === this.selectedColor);
+    });
+  }
+
+  quickAdd() {
+    document.getElementById('titleInput').focus();
+    this.showToast('Hızlı not ekleme! ⚡', 'success');
+  }
+
+  showModal(modalId) {
+    document.getElementById(modalId).classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('show'), 100);
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => {
+        if (toast.parentElement) {
+          document.body.removeChild(toast);
         }
-      });
+      }, 400);
+    }, 3000);
+  }
+
+  // Photo Upload
+  openPhotoUpload() {
+    document.getElementById('photoUpload').click();
+  }
+
+  handlePhotoUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      this.showToast('Lütfen geçerli bir resim dosyası seçin!', 'danger');
+      return;
     }
-  });
 
-  const topTags = Object.entries(tagStats)
-    .sort(([,a], [,b]) => b - a)
-    .slice(0, 5);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const note = {
+        id: this.generateId(),
+        title: `Fotoğraf - ${file.name}`,
+        content: `Fotoğraf yüklendi: ${file.name}\nBoyut: ${(file.size / 1024).toFixed(1)} KB`,
+        tags: 'fotoğraf,resim',
+        category: 'Medya',
+        color: this.selectedColor,
+        image: e.target.result,
+        pinned: false,
+        archived: false,
+        created: Date.now(),
+        updated: Date.now()
+      };
 
-  document.getElementById('statsContent').innerHTML = `
-    <div class="stats">
-      <div class="stat-item">
-        <div class="stat-number">${total}</div>
-        <div>Toplam Not</div>
+      this.notes.unshift(note);
+      this.saveNotes();
+      this.render();
+      this.showToast('Fotoğraf eklendi! 📷', 'success');
+      event.target.value = '';
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  // Statistics
+  showStats() {
+    const total = this.notes.length;
+    const pinned = this.notes.filter(n => n.pinned).length;
+    const archived = this.notes.filter(n => n.archived).length;
+    const categories = {};
+    const tags = {};
+
+    this.notes.forEach(note => {
+      if (note.category) {
+        categories[note.category] = (categories[note.category] || 0) + 1;
+      }
+      if (note.tags) {
+        note.tags.split(',').forEach(tag => {
+          const cleanTag = tag.trim();
+          if (cleanTag) {
+            tags[cleanTag] = (tags[cleanTag] || 0) + 1;
+          }
+        });
+      }
+    });
+
+    const topTags = Object.entries(tags)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5);
+
+    const statsHTML = `
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">${total}</div>
+          <div class="stat-label">Toplam Not</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${pinned}</div>
+          <div class="stat-label">Sabitlenmiş</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${archived}</div>
+          <div class="stat-label">Arşivlenmiş</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${Object.keys(categories).length}</div>
+          <div class="stat-label">Kategori</div>
+        </div>
       </div>
-      <div class="stat-item">
-        <div class="stat-number">${pinned}</div>
-        <div>Sabitlenmiş</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number">${archived}</div>
-        <div>Arşivlenmiş</div>
-      </div>
-    </div>
 
-    <h4>📊 Kategoriler</h4>
-    ${Object.entries(categories).map(([cat, count]) => 
-      `<div class="row" style="justify-content:space-between;margin:5px 0">
-        <span>${cat}</span><span class="pill">${count}</span>
-      </div>`
-    ).join('') || '<p class="muted">Henüz kategori yok</p>'}
+      <h4 style="margin: 24px 0 16px 0; color: var(--accent);">📊 Kategoriler</h4>
+      ${Object.entries(categories).length > 0 ? 
+        Object.entries(categories).map(([cat, count]) => 
+          `<div style="display: flex; justify-content: space-between; margin: 8px 0; padding: 8px; background: var(--bg); border-radius: 8px;">
+            <span>${cat}</span>
+            <span class="count-badge">${count}</span>
+          </div>`
+        ).join('') : 
+        '<p style="color: var(--muted); text-align: center;">Henüz kategori yok</p>'
+      }
 
-    <h4>🏷️ En Çok Kullanılan Etiketler</h4>
-    ${topTags.map(([tag, count]) => 
-      `<div class="row" style="justify-content:space-between;margin:5px 0">
-        <span>${tag}</span><span class="pill">${count}</span>
-      </div>`
-    ).join('') || '<p class="muted">Henüz etiket yok</p>'}
-  `;
+      <h4 style="margin: 24px 0 16px 0; color: var(--accent);">🏷️ Popüler Etiketler</h4>
+      ${topTags.length > 0 ? 
+        topTags.map(([tag, count]) => 
+          `<div style="display: flex; justify-content: space-between; margin: 8px 0; padding: 8px; background: var(--bg); border-radius: 8px;">
+            <span>${tag}</span>
+            <span class="count-badge">${count}</span>
+          </div>`
+        ).join('') : 
+        '<p style="color: var(--muted); text-align: center;">Henüz etiket yok</p>'
+      }
+    `;
 
-  showModal('statsModal');
-}
+    document.getElementById('statsContent').innerHTML = statsHTML;
+    this.showModal('statsModal');
+  }
 
-// Import/Export
-function exportNotes() {
-  const dataStr = JSON.stringify(notes, null, 2);
-  const dataBlob = new Blob([dataStr], {type: 'application/json'});
-  const url = URL.createObjectURL(dataBlob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `kendime-notlar-${new Date().toISOString().split('T')[0]}.json`;
-  link.click();
-  URL.revokeObjectURL(url);
-  showToast("Notlar dışa aktarıldı! 💾", "success");
-}
+  // Theme Management
+  toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    this.showToast(newTheme === 'dark' ? 'Koyu tema! 🌙' : 'Açık tema! ☀️', 'success');
+  }
 
-function importNotes() {
-  const file = event.target.files[0];
-  if (!file) return;
+  loadTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  }
 
-  const reader = new FileReader();
-  reader.onload = function(e) {
+  // Settings
+  showSettings() {
+    this.showModal('settingsModal');
+  }
+
+  // Import/Export
+  exportNotes() {
+    const dataStr = JSON.stringify(this.notes, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `kendime-notlar-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    this.showToast('Notlar dışa aktarıldı! 💾', 'success');
+  }
+
+  importNotes() {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedNotes = JSON.parse(e.target.result);
+        if (Array.isArray(importedNotes)) {
+          this.notes = [...importedNotes, ...this.notes];
+          this.saveNotes();
+          this.render();
+          this.showToast(`${importedNotes.length} not içe aktarıldı! 📂`, 'success');
+        } else {
+          this.showToast('Geçersiz dosya formatı!', 'danger');
+        }
+      } catch (error) {
+        this.showToast('Dosya okuma hatası!', 'danger');
+      }
+      event.target.value = '';
+    };
+    reader.readAsText(file);
+  }
+
+  clearAllData() {
+    if (!confirm('Tüm notlarınız silinecek! Bu işlem geri alınamaz.')) return;
+    if (!confirm('Son kez soruyorum: Gerçekten tüm verileri silmek istiyorum!')) return;
+
+    this.notes = [];
+    this.saveNotes();
+    this.render();
+    this.showToast('Tüm veriler silindi! 🗑️', 'warning');
+    this.closeModal('settingsModal');
+  }
+
+  // Utility Functions
+  formatDate(timestamp) {
+    return new Date(timestamp).toLocaleDateString('tr-TR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  hapticFeedback() {
+    if (this.isMobile && 'vibrate' in navigator) {
+      navigator.vibrate(50);
+    }
+  }
+
+  extractNoteId(noteCard) {
+    // Extract note ID from note card (implementation depends on your HTML structure)
+    const editBtn = noteCard.querySelector('[onclick*="editNote"]');
+    if (editBtn) {
+      const match = editBtn.getAttribute('onclick').match(/'([^']+)'/);
+      return match ? match[1] : null;
+    }
+    return null;
+  }
+
+  autoSave() {
+    // Auto-save draft functionality
+    const draft = {
+      title: document.getElementById('titleInput').value,
+      content: document.getElementById('contentInput').value,
+      tags: document.getElementById('tagsInput').value,
+      category: document.getElementById('categorySelect').value,
+      color: this.selectedColor
+    };
+    localStorage.setItem('kendime_draft', JSON.stringify(draft));
+  }
+
+  loadDraft() {
     try {
-      const importedNotes = JSON.parse(e.target.result);
-      if (Array.isArray(importedNotes)) {
-        notes = [...importedNotes, ...notes];
-        save();
-        showToast(`${importedNotes.length} not içe aktarıldı! 📂`, "success");
-      } else {
-        showToast("Geçersiz dosya formatı", "danger");
+      const draft = JSON.parse(localStorage.getItem('kendime_draft') || '{}');
+      if (draft.title || draft.content) {
+        document.getElementById('titleInput').value = draft.title || '';
+        document.getElementById('contentInput').value = draft.content || '';
+        document.getElementById('tagsInput').value = draft.tags || '';
+        document.getElementById('categorySelect').value = draft.category || '';
+        this.selectedColor = draft.color || '#ffffff';
+        this.updateColorPicker();
       }
     } catch (error) {
-      showToast("Dosya okuma hatası", "danger");
+      console.error('Error loading draft:', error);
     }
-  };
-  reader.readAsText(file);
-}
-
-// Theme
-function toggleTheme() {
-  const dark = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() === '#121212';
-  if (dark) {
-    setVars('#f7f7f7', '#111', '#fff', '#666', '#e9e9e9');
-  } else {
-    setVars('#121212', '#eee', '#1e1e1e', '#aaa', '#333');
-  }
-  showToast(dark ? "Açık tema! ☀️" : "Koyu tema! 🌙", "success");
-}
-
-function setVars(bg, fg, card, muted, border) {
-  const root = document.documentElement.style;
-  root.setProperty('--bg', bg);
-  root.setProperty('--fg', fg);
-  root.setProperty('--card', card);
-  root.setProperty('--muted', muted);
-  root.setProperty('--border', border);
-}
-
-// Render
-function render() {
-  const list = document.getElementById("list");
-  let filtered = notes.filter(n => {
-    const searchMatch = !query || (n.title + " " + n.content + " " + (n.tags || "") + " " + (n.category || ""))
-      .toLowerCase().includes(query);
-
-    switch (currentFilter) {
-      case 'pinned': return searchMatch && n.pinned && !n.archived;
-      case 'archived': return searchMatch && n.archived;
-      case 'recent': return searchMatch && !n.archived && (Date.now() - n.ts < 7 * 24 * 60 * 60 * 1000);
-      default: return searchMatch && !n.archived;
-    }
-  });
-
-  // Sorting
-  const sortBy = document.getElementById('sortBy').value;
-  filtered.sort((a, b) => {
-    if (a.pinned !== b.pinned) return b.pinned - a.pinned;
-
-    switch (sortBy) {
-      case 'oldest': return a.ts - b.ts;
-      case 'title': return (a.title || '').localeCompare(b.title || '');
-      case 'updated': return b.updated - a.updated;
-      default: return b.ts - a.ts;
-    }
-  });
-
-  document.getElementById('count').textContent = `${filtered.length} not`;
-
-  list.innerHTML = filtered.map(n => `
-    <div class="card note-card ${n.pinned ? 'pinned' : ''} ${n.archived ? 'archived' : ''}" 
-         style="background:${n.color || '#fff'}">
-      <div class="row" style="justify-content:space-between;margin-bottom:8px">
-        <div class="row">
-          ${n.category ? `<span class="pill">${n.category}</span>` : ''}
-          ${(n.tags || '').split(',').filter(t => t.trim()).slice(0, 2).map(tag => 
-            `<span class="pill" onclick="searchTag('${tag.trim()}')">${tag.trim()}</span>`
-          ).join('')}
-        </div>
-        <div class="row">
-          <button class="light" onclick="togglePin('${n.id}')" title="${n.pinned ? 'Sabitlemeyi kaldır' : 'Sabitle'}">
-            ${n.pinned ? '📌' : '📍'}
-          </button>
-          <button class="light" onclick="editNote('${n.id}')" title="Düzenle">✏️</button>
-          <button class="light" onclick="duplicateNote('${n.id}')" title="Kopyala">📋</button>
-          <button class="light" onclick="toggleArchive('${n.id}')" title="${n.archived ? 'Arşivden çıkar' : 'Arşivle'}">
-            ${n.archived ? '📤' : '📁'}
-          </button>
-          <button class="light" onclick="removeNote('${n.id}')" title="Sil">🗑️</button>
-        </div>
-      </div>
-
-      <h4 style="margin:.3rem 0">${escape(n.title || 'Başlıksız')}</h4>
-      ${n.image ? `<img src="${n.image}" style="max-width:100%;height:auto;border-radius:8px;margin:8px 0;" alt="Yüklenen resim">` : ''}
-      <div class="note-content muted">${escape(n.content).slice(0, 200)}${n.content.length > 200 ? '...' : ''}</div>
-
-      <div class="row" style="justify-content:space-between;margin-top:8px;font-size:12px">
-        <span class="muted">📅 ${formatDate(n.ts)}</span>
-        ${n.updated !== n.ts ? `<span class="muted">✏️ ${formatDate(n.updated)}</span>` : ''}
-      </div>
-    </div>
-  `).join('');
-}
-
-function searchTag(tag) {
-  document.getElementById('q').value = tag;
-  doSearch();
-  showToast(`"${tag}" etiketiyle arama yapılıyor...`, "success");
-}
-
-// Keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-  // Ctrl+N - Quick add
-  if (e.ctrlKey && e.key === 'n') {
-    e.preventDefault();
-    quickAdd();
   }
 
-  // Ctrl+F - Focus search
-  if (e.ctrlKey && e.key === 'f') {
-    e.preventDefault();
-    document.getElementById('q').focus();
+  clearDraft() {
+    localStorage.removeItem('kendime_draft');
   }
 
-  // Ctrl+Shift+V - Voice search
-  if (e.ctrlKey && e.shiftKey && e.key === 'V') {
-    e.preventDefault();
-    toggleVoiceSearch();
-  }
-
-  // Ctrl+Shift+N - Voice note
-  if (e.ctrlKey && e.shiftKey && e.key === 'N') {
-    e.preventDefault();
-    startVoiceNote();
-  }
-
-  // Ctrl+Enter - Add note
-  if (e.ctrlKey && e.key === 'Enter') {
-    e.preventDefault();
-    addNote();
-  }
-
-  // Escape - Clear form
-  if (e.key === 'Escape') {
-    clearForm();
-  }
-});
-
-// Touch swipe functionality
-document.addEventListener('touchstart', function(e) {
-  if (e.target.closest('.note-card')) {
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-  }
-}, { passive: true });
-
-document.addEventListener('touchend', function(e) {
-  if (!e.target.closest('.note-card')) return;
-
-  const touchEndX = e.changedTouches[0].clientX;
-  const touchEndY = e.changedTouches[0].clientY;
-  const deltaX = touchStartX - touchEndX;
-  const deltaY = Math.abs(touchStartY - touchEndY);
-
-  // Horizontal swipe with minimum distance and not too much vertical movement
-  if (Math.abs(deltaX) > 100 && deltaY < 50) {
-    const noteCard = e.target.closest('.note-card');
-    const noteId = noteCard.querySelector('[onclick*="removeNote"]')?.onclick.toString().match(/'([^']+)'/)?.[1];
-
-    if (deltaX > 0 && noteId) { // Swipe left to delete
-      noteCard.classList.add('haptic-feedback');
+  showWelcomeMessage() {
+    if (this.notes.length === 0) {
       setTimeout(() => {
-        if (confirm('Bu notu silmek istediğinizden emin misiniz?')) {
-          removeNote(noteId);
-        }
-      }, 100);
+        this.showToast('Kendime\'ye hoş geldiniz! 🎉 İlk notunuzu ekleyin.', 'success');
+      }, 1000);
     }
   }
-}, { passive: true });
 
-// Haptic feedback for mobile
-function addHapticFeedback(element) {
-  if (isMobile && 'vibrate' in navigator) {
-    navigator.vibrate(10);
-  }
-  if (element) {
-    element.classList.add('haptic-feedback');
-    setTimeout(() => element.classList.remove('haptic-feedback'), 100);
+  // Main render function
+  render() {
+    const filteredNotes = this.filterNotes();
+    const container = document.getElementById('notesContainer');
+    const countElement = document.getElementById('noteCount');
+
+    countElement.textContent = `${filteredNotes.length} not`;
+
+    if (filteredNotes.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--muted);">
+          <div style="font-size: 48px; margin-bottom: 16px;">📝</div>
+          <h3 style="margin-bottom: 8px;">Henüz not yok</h3>
+          <p>İlk notunuzu eklemek için yukarıdaki formu kullanın veya + butonuna tıklayın.</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = filteredNotes.map(note => `
+      <div class="note-card ${note.pinned ? 'pinned' : ''}" style="background: ${note.color}">
+        <div class="note-header">
+          <div>
+            ${note.category ? `<span class="category-badge">${note.category}</span>` : ''}
+            ${note.pinned ? '<span style="color: var(--accent); font-size: 16px;">📌</span>' : ''}
+          </div>
+          <div class="note-actions">
+            <button class="note-action" onclick="app.togglePin('${note.id}')" title="${note.pinned ? 'Sabitlemeyi kaldır' : 'Sabitle'}">
+              ${note.pinned ? '📌' : '📍'}
+            </button>
+            <button class="note-action" onclick="app.editNote('${note.id}')" title="Düzenle">✏️</button>
+            <button class="note-action" onclick="app.duplicateNote('${note.id}')" title="Kopyala">📋</button>
+            <button class="note-action" onclick="app.toggleArchive('${note.id}')" title="Arşivle">📁</button>
+            <button class="note-action" onclick="app.removeNote('${note.id}')" title="Sil">🗑️</button>
+          </div>
+        </div>
+
+        <h4 class="note-title">${this.escapeHtml(note.title)}</h4>
+        
+        ${note.image ? `
+          <img src="${note.image}" style="max-width: 100%; height: auto; border-radius: 8px; margin: 12px 0;" alt="Yüklenen resim">
+        ` : ''}
+        
+        <div class="note-content">${this.escapeHtml(note.content.slice(0, 200))}${note.content.length > 200 ? '...' : ''}</div>
+
+        ${note.tags ? `
+          <div style="margin: 12px 0;">
+            ${note.tags.split(',').filter(t => t.trim()).slice(0, 3).map(tag => 
+              `<span class="tag" onclick="app.searchByTag('${tag.trim()}')">${tag.trim()}</span>`
+            ).join('')}
+          </div>
+        ` : ''}
+
+        <div class="note-meta">
+          <span>📅 ${this.formatDate(note.created)}</span>
+          ${note.updated !== note.created ? `<span>✏️ ${this.formatDate(note.updated)}</span>` : ''}
+        </div>
+      </div>
+    `).join('');
   }
 }
 
-// Enhanced mobile voice recognition
-if (isMobile && recognition) {
-  recognition.continuous = true; // Better for mobile
-  recognition.interimResults = true;
+// Global functions for onclick handlers
+let app;
 
-  let interimTranscript = '';
-  recognition.onresult = function(event) {
-    let finalTranscript = '';
+function addNote() { app.addNote(); }
+function editNote(id) { app.editNote(id); }
+function saveEdit() { app.saveEdit(); }
+function removeNote(id) { app.removeNote(id); }
+function togglePin(id) { app.togglePin(id); }
+function toggleArchive(id) { app.toggleArchive(id); }
+function duplicateNote(id) { app.duplicateNote(id); }
+function clearForm() { app.clearForm(); }
+function selectColor(color) { app.selectColor(color); }
+function doSearch() { app.doSearch(); }
+function quickAdd() { app.quickAdd(); }
+function toggleVoiceSearch() { app.toggleVoiceSearch(); }
+function startVoiceNote() { app.startVoiceNote(); }
+function openPhotoUpload() { app.openPhotoUpload(); }
+function handlePhotoUpload(event) { app.handlePhotoUpload(event); }
+function showStats() { app.showStats(); }
+function showSettings() { app.showSettings(); }
+function toggleTheme() { app.toggleTheme(); }
+function exportNotes() { app.exportNotes(); }
+function importNotes() { app.importNotes(); }
+function clearAllData() { app.clearAllData(); }
+function showModal(modalId) { app.showModal(modalId); }
+function closeModal(modalId) { app.closeModal(modalId); }
 
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      if (event.results[i].isFinal) {
-        finalTranscript += event.results[i][0].transcript;
-      } else {
-        interimTranscript = event.results[i][0].transcript;
-      }
-    }
-
-    if (finalTranscript) {
-      handleVoiceCommand(finalTranscript.toLowerCase());
-    }
-
-    // Show interim results
-    if (interimTranscript && document.getElementById('speechStatus').style.display === 'block') {
-      document.getElementById('speechStatus').innerHTML = `🎤 "${interimTranscript}"`;
-    }
-  };
-}
-
-// Close modals when clicking outside
-document.addEventListener('click', function(e) {
-  if (e.target.classList.contains('modal')) {
-    e.target.classList.remove('show');
-  }
+// Initialize app when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  app = new KendimeApp();
+  app.loadTheme();
+  app.loadDraft();
 });
 
-// Show swipe hint on mobile
-if (isMobile && notes.length > 0) {
-  setTimeout(() => {
-    const hint = document.getElementById('swipeHint');
-    hint.style.display = 'block';
-    setTimeout(() => {
-      hint.style.display = 'none';
-    }, 3000);
-  }, 2000);
-}
-
-// Menu functions
-function toggleMenu() {
-  const dropdown = document.getElementById('menuDropdown');
-  dropdown.classList.toggle('show');
-}
-
-function showSettings() {
-  closeMenu();
-  showModal('settingsModal');
-}
-
-function showHelp() {
-  closeMenu();
-  showModal('helpModal');
-}
-
-function closeMenu() {
-  document.getElementById('menuDropdown').classList.remove('show');
-}
-
-// Settings functions
-function changeCardSize() {
-  const size = document.getElementById('cardSize').value;
-  const root = document.documentElement.style;
-
-  switch(size) {
-    case 'small':
-      root.setProperty('--card-min-width', '250px');
-      break;
-    case 'large':
-      root.setProperty('--card-min-width', '400px');
-      break;
-    default:
-      root.setProperty('--card-min-width', '300px');
-  }
-
-  showToast(`Kart boyutu ${size} olarak ayarlandı`, 'success');
-}
-
-function toggleVoiceCommands() {
-  const enabled = document.getElementById('voiceEnabled').checked;
-  showToast(enabled ? 'Ses komutları etkinleştirildi' : 'Ses komutları devre dışı bırakıldı', 'success');
-}
-
-function toggleSounds() {
-  const enabled = document.getElementById('soundEnabled').checked;
-  showToast(enabled ? 'Bildirim sesleri etkinleştirildi' : 'Bildirim sesleri kapatıldı', 'success');
-}
-
-function toggleAutoSave() {
-  const enabled = document.getElementById('autoSave').checked;
-  showToast(enabled ? 'Otomatik kaydetme etkinleştirildi' : 'Otomatik kaydetme kapatıldı', 'success');
-}
-
-function toggleFilters() {
-  const enabled = document.getElementById('showFilters').checked;
-  const filterControls = document.getElementById('filterControls');
-  filterControls.style.display = enabled ? 'block' : 'none';
-  showToast(enabled ? 'Filtreler gösteriliyor' : 'Filtreler gizlendi', 'success');
-}
-
-function toggleAISuggestions() {
-  const enabled = document.getElementById('aiSuggestions').checked;
-  showToast(enabled ? 'AI önerileri etkinleştirildi' : 'AI önerileri kapatıldı', 'success');
-}
-
-function clearAllData() {
-  if (confirm('Tüm notlarınız silinecek! Bu işlem geri alınamaz. Emin misiniz?')) {
-    if (confirm('Son kez soruyorum: Gerçekten tüm verileri silmek istiyor musunuz?')) {
-      notes = [];
-      localStorage.removeItem(KEY);
-      render();
-      showToast('Tüm veriler silindi! 🗑️', 'warning');
-      closeModal('settingsModal');
-    }
-  }
-}
-
-// Close menu when clicking outside
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('.menu-container')) {
-    closeMenu();
-  }
+// Clear draft when note is added
+document.addEventListener('noteAdded', () => {
+  app.clearDraft();
 });
-
-// Initialize
-updateColorPicker();
-render();
-
-// Welcome message
-if (notes.length === 0) {
-  showToast("Kendime'ye hoş geldiniz! 🎉 İlk notunuzu ekleyin.", "success");
-}
 </script>
 </body>
 </html>
