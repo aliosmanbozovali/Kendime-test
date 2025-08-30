@@ -33,4 +33,22 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 
 // Diğer tüm JavaScript fonksiyonları HTML'den buraya taşınacak
-// (Bu örnekte kısa tutuyorum, tüm kodu taşımanız gerekiyor)
+// (Bu örnekte kısa tutuyorum, tüm kodu taşımanız gerekiyor)function toggleTheme() {
+  document.body.classList.toggle("dark-mode");
+}
+
+function addNote() {
+  const input = document.getElementById("noteInput");
+  const category = document.getElementById("noteCategory").value;
+  const list = document.getElementById("noteList");
+  const message = document.getElementById("emptyMessage");
+
+  if (input.value.trim() === "") return;
+
+  const li = document.createElement("li");
+  li.textContent = `${input.value} [${category}]`;
+  list.appendChild(li);
+
+  input.value = "";
+  message.style.display = "none";
+}
