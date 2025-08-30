@@ -1888,4 +1888,32 @@ document.addEventListener('noteAdded', () => {
 });
 </script>
 </body>
+</html><!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kendime Test</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <button onclick="toggleTheme()">🌙 Tema Değiştir</button>
+
+  <h1>Kendime Notlar</h1>
+
+  <div id="noteForm">
+    <input type="text" id="noteInput" placeholder="Notunu yaz..." />
+    <select id="noteCategory">
+      <option value="kişisel">Kişisel</option>
+      <option value="iş">İş</option>
+      <option value="hedef">Hedef</option>
+    </select>
+    <button onclick="addNote()">+ Ekle</button>
+  </div>
+
+  <p id="emptyMessage">Henüz notun yok. Hadi ilk adımı at! 🚀</p>
+  <ul id="noteList"></ul>
+
+  <script src="script.js"></script>
+</body>
 </html>
